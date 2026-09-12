@@ -1,0 +1,21 @@
+# The kernel: geometry and sketches. About 85 MB to download.
+#
+# The FEM studies are in requirements-sim.txt, and are not needed to model,
+# draw, unfold, export or check a part -- see the note there.
+
+# geometry kernel (OpenCASCADE 7.9 bindings) -- LGPL, safe to import in-process.
+# The `-novtk` build, which is the same wrapper without a hard requirement on
+# vtk: nothing here draws with VTK, and asking for it costs 639 MB of vtk plus
+# the 35 MB of matplotlib that vtk itself requires.
+cadquery-ocp-novtk==8.0.1.0.0
+# 2D constraint solver (FreeCAD's PlaneGCS) -- LGPL, safe to import in-process
+planegcs==0.8.0
+# linear algebra for the assembly solver: the mate residuals are least squares,
+# and the freedom an assembly has left is the rank and null space of their
+# Jacobian. Here rather than in requirements-sim.txt because placing parts is
+# modelling -- the FEM is what that file is for. BSD, like this.
+numpy>=1.24
+# the `render` tool draws the part to a PNG; nothing else here draws. Small,
+# and shipped, so declared -- an install without it had a tool that always
+# failed
+pillow>=10

@@ -1,0 +1,33 @@
+{
+ "id": "plate_4_holes",
+ "prompt": "Make a rectangular mounting plate, 80 mm by 60 mm, 6 mm thick, with four through holes of 6.6 mm diameter whose centres are 10 mm in from each edge (one near each corner), and round the four vertical corner edges of the plate with a 5 mm radius.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    80,
+    60,
+    6
+   ]
+  },
+  {
+   "type": "volume",
+   "between": [
+    27293.149197254315,
+    28407.155286938163
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 3.3,
+   "count": 4
+  },
+  {
+   "type": "printable",
+   "min_wall": 1.5
+  }
+ ]
+}

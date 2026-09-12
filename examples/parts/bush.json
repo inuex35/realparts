@@ -1,0 +1,18 @@
+{
+  "meta": {"name": "camera bush", "note": "a flanged bush that drops into the bracket bore"},
+  "parameters": {"outer_d": 27.8, "inner_d": 20, "flange_d": 42, "flange_t": 5, "length": 16},
+  "parameters_bounds": {"outer_d": [16, 34], "inner_d": [8, 26], "flange_d": [30, 60],
+                        "flange_t": [3, 9], "length": [8, 30]},
+  "asserts": ["outer_d > inner_d + 4", "flange_d > outer_d + 6"],
+  "features": [
+    {"id": "barrel", "type": "cylinder", "radius": "outer_d/2", "height": "length",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": false},
+    {"id": "flange", "type": "cylinder", "radius": "flange_d/2", "height": "flange_t",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": false},
+    {"id": "outer", "type": "fuse", "target": "barrel", "tool": "flange"},
+    {"id": "hole", "type": "cylinder", "radius": "inner_d/2", "height": "length*3",
+     "at": [0, 0, "-length"], "axis": [0, 0, 1], "centred": false},
+    {"id": "bush", "type": "cut", "target": "outer", "tool": "hole"}
+  ],
+  "result": "bush"
+}

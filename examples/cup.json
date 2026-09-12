@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "name": "cup",
+    "note": "revolved body, shelled with a heavier floor, swept handle"
+  },
+  "parameters": {
+    "base_r": 35,
+    "rim_r": 40,
+    "height": 95,
+    "wall": 2.5,
+    "floor": 4.0,
+    "handle_r": 6,
+    "handle_low": 25,
+    "handle_high": 70,
+    "handle_out": 34,
+    "rim_round": 1.2
+  },
+  "parameters_bounds": {
+    "base_r": [
+      28,
+      42
+    ],
+    "rim_r": [
+      34,
+      48
+    ],
+    "height": [
+      70,
+      120
+    ],
+    "wall": [
+      1.6,
+      4
+    ],
+    "floor": [
+      2.5,
+      8
+    ],
+    "handle_r": [
+      4,
+      9
+    ],
+    "rim_round": [
+      0.4,
+      2.0
+    ]
+  },
+  "asserts": [
+    "rim_r > base_r + 2",
+    "wall < base_r/6",
+    "floor > wall",
+    "height > 60",
+    "handle_r < wall*4"
+  ],
+  "features": [
+    {
+      "id": "section",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          0,
+          0
+        ],
+        "b": [
+          35,
+          0
+        ],
+        "c": [
+          40,
+          95
+        ],
+        "d": [
+          0,
+          95
+        ]
+      },
+      "lines": {
+        "base": [
+          "a",
+          "b"
+        ],
+        "side": [
+          "b",
+          "c"
+        ],
+        "rim": [
+          "c",
+          "d"
+        ],
+        "axis": [
+          "d",
+          "a"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "horizontal",
+          "line": "base"
+        },
+        {
+          "type": "horizontal",
+          "line": "rim"
+        },
+        {
+          "type": "vertical",
+          "line": "axis"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "b"
+          ],
+          "value": "base_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "d",
+            "c"
+          ],
+          "value": "rim_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "d"
+          ],
+          "value": "height"
+        }
+      ]
+    },
+    {
+      "id": "blank",
+      "type": "revolve",
+      "sketch": "section",
+      "angle": 360,
+      "axis": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "body",
+      "type": "shell",
+      "body": "blank",
+      "open": [
+        "blank/rim"
+      ],
+      "thickness": {
+        "default": "wall",
+        "faces": {
+          "blank/base": "floor"
+        }
+      }
+    },
+    {
+      "id": "grip",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          "handle_out",
+          0,
+          "handle_low"
+        ],
+        "normal": [
+          1,
+          0,
+          0
+        ],
+        "x_axis": [
+          0,
+          1,
+          0
+        ]
+      },
+      "points": {
+        "o": [
+          0,
+          0
+        ]
+      },
+      "circles": {
+        "round": {
+          "centre": "o",
+          "radius": "handle_r"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "o",
+          "at": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arc",
+      "type": "sketch",
+      "open": true,
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "low": [
+          34,
+          25
+        ],
+        "high": [
+          34,
+          70
+        ],
+        "centre": [
+          34,
+          47.5
+        ]
+      },
+      "arcs": {
+        "loop": {
+          "centre": "centre",
+          "from": "low",
+          "to": "high",
+          "ccw": true
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "low",
+          "at": [
+            "handle_out",
+            "handle_low"
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "high",
+          "at": [
+            "handle_out",
+            "handle_high"
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "centre",
+          "at": [
+            "handle_out",
+            "(handle_low + handle_high)/2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handle",
+      "type": "sweep",
+      "profile": "grip",
+      "path": "arc"
+    },
+    {
+      "id": "cup",
+      "type": "fuse",
+      "target": "body",
+      "tool": "handle"
+    },
+    {
+      "id": "eased",
+      "type": "fillet",
+      "body": "cup",
+      "radius": "rim_round",
+      "edges": {
+        "of_face": "blank/rim"
+      }
+    }
+  ],
+  "result": "eased",
+  "studies": [
+    {
+      "id": "carry",
+      "type": "static_structural",
+      "material": "PLA",
+      "mesh_size": 5.0,
+      "note": "held by the handle, full: 350 ml of water plus the cup itself",
+      "fix": [
+        "handle/round@2"
+      ],
+      "loads": [
+        {
+          "face": "body/-z",
+          "force": [
+            0,
+            0,
+            -4.5
+          ]
+        }
+      ],
+      "require": {
+        "safety_factor": ">= 2"
+      }
+    }
+  ]
+}

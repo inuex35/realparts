@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "name": "two bushed brackets on a rail",
+    "note": "an assembly whose parts are assemblies: assembly.json twice, each bracket-and-bush a sub-assembly, stood on a rail. Names nest with the parts (`left:base:plate/-z`), the bill of materials nests with them, and the STEP goes out as an assembly of assemblies"
+  },
+  "parameters": {"apart": 90, "rail": 200},
+  "features": [
+    {"id": "rail", "type": "box", "size": ["rail", 60, 8], "at": [0, 0, 0], "centred": false},
+    {"id": "left", "type": "part", "document": "assembly.json", "material": "A6061"},
+    {"id": "right", "type": "part", "document": "assembly.json",
+     "parameters": {"bore": 16}, "material": "A6061",
+     "note": "the same sub-assembly with a bigger bore: a second line in the bill, not a second of the first"},
+    {"id": "asm", "type": "assemble",
+     "bodies": ["rail", "left", "right"], "ground": "rail",
+     "mates": [
+       {"kind": "fastened", "faces": ["left:base:plate/-z@0", "rail/+z"]},
+       {"kind": "planar", "faces": ["right:base:plate/-z@0", "rail/+z"]},
+       {"kind": "distance", "faces": ["right:base:plate/-x@0", "left:base:plate/+x@0"],
+        "offset": "apart", "flip": true,
+        "note": "the second bracket this far along from the first"},
+       {"kind": "planar", "faces": ["right:base:plate/-y", "left:base:plate/-y"], "flip": false}
+     ]}
+  ],
+  "result": "asm"
+}

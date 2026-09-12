@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "name": "four-bar linkage",
+    "note": "four links hinged in a loop. The mates are solved together and leave one freedom; `crank_angle` drives it, so building at another angle is the mechanism in another position"
+  },
+  "parameters": {
+    "ground": 120,
+    "crank": 40,
+    "coupler": 100,
+    "rocker": 80,
+    "crank_angle": 30
+  },
+  "asserts": ["crank + ground <= coupler + rocker"],
+  "features": [
+    {"id": "frame", "type": "part", "document": "parts/link.json",
+     "parameters": {"length": "ground"}, "material": "A6061"},
+    {"id": "crank", "type": "part", "document": "parts/link.json",
+     "parameters": {"length": "crank"}, "material": "A6061"},
+    {"id": "coupler", "type": "part", "document": "parts/link.json",
+     "parameters": {"length": "coupler"}, "material": "A6061"},
+    {"id": "rocker", "type": "part", "document": "parts/link.json",
+     "parameters": {"length": "rocker"}, "material": "A6061"},
+    {"id": "asm", "type": "assemble",
+     "bodies": ["frame", "crank", "coupler", "rocker"],
+     "ground": "frame",
+     "mates": [
+       {"kind": "hinge", "faces": ["crank:b1/side", "frame:b1/side"], "offset": 6, "flip": false,
+        "note": "each link sits one thickness above the one before"},
+       {"kind": "hinge", "faces": ["coupler:b1/side", "crank:b2/side"], "offset": 6, "flip": false},
+       {"kind": "hinge", "faces": ["rocker:b1/side", "coupler:b2/side"], "offset": 6, "flip": false},
+       {"kind": "hinge", "faces": ["rocker:b2/side", "frame:b2/side"], "offset": 18, "flip": false,
+        "note": "closes the loop: three thicknesses up from the frame"}
+     ],
+     "drive": [{"part": "crank", "turn": "crank_angle"}]}
+  ],
+  "result": "asm"
+}

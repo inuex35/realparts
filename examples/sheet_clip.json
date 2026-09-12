@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "name": "sheet clip (locked)",
+    "note": "the two halves in the position they take under load: the knob's neck sitting at the far end of the slot, which is where the elastic drives it"
+  },
+  "parameters": {
+    "seat": -6.0
+  },
+  "features": [
+    {
+      "id": "plate",
+      "type": "part",
+      "document": "sheet_collar.json"
+    },
+    {
+      "id": "knob",
+      "type": "part",
+      "document": "sheet_knob.json"
+    },
+    {
+      "id": "seated",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "knob",
+      "to": "plate",
+      "faces": [
+        "knob:knob/neck",
+        "plate:keyway/key/end"
+      ],
+      "offset": "seat",
+      "note": "the neck is round and so is the slot's end cap, so concentric on those two is the locked position; the offset drops the knob until its neck straddles the plate, tail disc below and flared head above",
+      "flip": false
+    },
+    {
+      "id": "clip",
+      "type": "assemble",
+      "bodies": [
+        "plate",
+        "seated"
+      ]
+    }
+  ],
+  "result": "clip"
+}

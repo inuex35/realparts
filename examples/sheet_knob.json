@@ -1,0 +1,255 @@
+{
+  "meta": {
+    "name": "sheet clip -- knob",
+    "material": "PLA",
+    "note": "the half of a tarp-style sheet clip that goes behind the fabric: an arrowhead, so the head flares at 45 degrees and prints without support"
+  },
+  "parameters": {
+    "tail_r": 7.0,
+    "tail_h": 3.5,
+    "neck_r": 3.5,
+    "neck_h": 7.0,
+    "head_r": 8.5,
+    "flare": 6.5,
+    "top_ch": 1.5,
+    "ease": 0.5
+  },
+  "parameters_bounds": {
+    "tail_r": [
+      5.0,
+      12.0
+    ],
+    "neck_r": [
+      2.5,
+      6.0
+    ],
+    "neck_h": [
+      5.0,
+      12.0
+    ],
+    "head_r": [
+      6.0,
+      14.0
+    ],
+    "flare": [
+      3.0,
+      9.0
+    ]
+  },
+  "asserts": [
+    "neck_r < tail_r - 1.5",
+    "neck_r < head_r - 2.0",
+    "flare >= head_r - neck_r",
+    "top_ch < head_r - neck_r - 1.0",
+    "ease < tail_h"
+  ],
+  "features": [
+    {
+      "id": "section",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          0,
+          0
+        ],
+        "b": [
+          7,
+          0
+        ],
+        "c": [
+          7,
+          3.5
+        ],
+        "d": [
+          3.5,
+          3.5
+        ],
+        "e": [
+          3.5,
+          10.5
+        ],
+        "f": [
+          8.5,
+          15.5
+        ],
+        "g": [
+          7,
+          17
+        ],
+        "h": [
+          0,
+          17
+        ]
+      },
+      "lines": {
+        "base": [
+          "a",
+          "b"
+        ],
+        "rim": [
+          "b",
+          "c"
+        ],
+        "under": [
+          "c",
+          "d"
+        ],
+        "neck": [
+          "d",
+          "e"
+        ],
+        "flare": [
+          "e",
+          "f"
+        ],
+        "crown": [
+          "f",
+          "g"
+        ],
+        "top": [
+          "g",
+          "h"
+        ],
+        "axis": [
+          "h",
+          "a"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "horizontal",
+          "line": "base"
+        },
+        {
+          "type": "horizontal",
+          "line": "under"
+        },
+        {
+          "type": "horizontal",
+          "line": "top"
+        },
+        {
+          "type": "vertical",
+          "line": "rim"
+        },
+        {
+          "type": "vertical",
+          "line": "neck"
+        },
+        {
+          "type": "vertical",
+          "line": "axis"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "b"
+          ],
+          "value": "tail_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "b",
+            "c"
+          ],
+          "value": "tail_h"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "c",
+            "d"
+          ],
+          "value": "tail_r - neck_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "d",
+            "e"
+          ],
+          "value": "neck_h"
+        },
+        {
+          "type": "distance_to_line",
+          "point": "f",
+          "line": "axis",
+          "value": "head_r"
+        },
+        {
+          "type": "distance_to_line",
+          "point": "f",
+          "line": "under",
+          "value": "neck_h + flare"
+        },
+        {
+          "type": "distance_to_line",
+          "point": "g",
+          "line": "axis",
+          "value": "head_r - top_ch"
+        },
+        {
+          "type": "distance_to_line",
+          "point": "g",
+          "line": "under",
+          "value": "neck_h + flare + top_ch"
+        }
+      ]
+    },
+    {
+      "id": "knob",
+      "type": "revolve",
+      "sketch": "section",
+      "angle": 360,
+      "axis": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "eased",
+      "type": "chamfer",
+      "body": "knob",
+      "distance": "ease",
+      "edges": {
+        "of_face": "knob/base"
+      }
+    }
+  ],
+  "result": "eased"
+}

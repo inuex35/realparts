@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "name": "threaded bottle",
+    "note": "revolved body, shelled through the mouth, with a real thread on the neck"
+  },
+  "parameters": {
+    "body_r": 30,
+    "body_h": 90,
+    "neck_r": 12,
+    "neck_h": 30,
+    "shoulder": 20,
+    "wall": 2.5,
+    "pitch": 3.0,
+    "thread_len": 22
+  },
+  "parameters_bounds": {
+    "body_r": [
+      20,
+      45
+    ],
+    "neck_r": [
+      8,
+      18
+    ],
+    "wall": [
+      1.2,
+      4.0
+    ],
+    "pitch": [
+      2.0,
+      4.0
+    ]
+  },
+  "asserts": [
+    "neck_r < body_r - 6",
+    "wall < neck_r/3",
+    "thread_len < neck_h",
+    "0.5413 * pitch < wall - 0.6"
+  ],
+  "features": [
+    {
+      "id": "section",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          0,
+          0
+        ],
+        "b": [
+          30,
+          0
+        ],
+        "c": [
+          30,
+          90
+        ],
+        "d": [
+          12,
+          110
+        ],
+        "e": [
+          12,
+          140
+        ],
+        "f": [
+          0,
+          140
+        ]
+      },
+      "lines": {
+        "base": [
+          "a",
+          "b"
+        ],
+        "side": [
+          "b",
+          "c"
+        ],
+        "shoulder": [
+          "c",
+          "d"
+        ],
+        "neck": [
+          "d",
+          "e"
+        ],
+        "mouth": [
+          "e",
+          "f"
+        ],
+        "axis": [
+          "f",
+          "a"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "horizontal",
+          "line": "base"
+        },
+        {
+          "type": "vertical",
+          "line": "side"
+        },
+        {
+          "type": "vertical",
+          "line": "neck"
+        },
+        {
+          "type": "horizontal",
+          "line": "mouth"
+        },
+        {
+          "type": "vertical",
+          "line": "axis"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "b"
+          ],
+          "value": "body_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "b",
+            "c"
+          ],
+          "value": "body_h"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "e",
+            "f"
+          ],
+          "value": "neck_r"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "d",
+            "e"
+          ],
+          "value": "neck_h"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "f"
+          ],
+          "value": "body_h + shoulder + neck_h"
+        }
+      ]
+    },
+    {
+      "id": "blank",
+      "type": "revolve",
+      "sketch": "section",
+      "angle": 360,
+      "axis": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "hollow",
+      "type": "shell",
+      "body": "blank",
+      "open": [
+        "blank/mouth"
+      ],
+      "thickness": "wall"
+    },
+    {
+      "id": "screw",
+      "type": "thread",
+      "body": "hollow",
+      "face": "blank/neck",
+      "pitch": "pitch",
+      "length": "thread_len",
+      "clearance": 0.15
+    }
+  ],
+  "result": "screw"
+}

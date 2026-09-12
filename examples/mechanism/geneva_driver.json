@@ -1,0 +1,30 @@
+{
+  "meta": {"name": "geneva driver", "material": "SUS304",
+           "note": "hub, arm and the pin that enters a slot once per turn"},
+  "parameters": {"crank": 45.0, "pin_d": 8.0, "thick": 8.0, "hub_d": 26.0,
+                 "arm_w": 16.0, "pin_len": 10.0, "ease": 0.6},
+  "parameters_bounds": {"crank": [20.0, 120.0], "pin_d": [4.0, 20.0],
+                        "thick": [4.0, 20.0], "arm_w": [8.0, 40.0]},
+  "asserts": ["pin_d < arm_w - 4", "hub_d > arm_w", "crank > hub_d/2 + pin_d",
+              "ease < thick/3"],
+  "features": [
+    {"id": "arm_sk", "type": "sketch",
+     "plane": {"origin": [0, 0, 0], "normal": [0, 0, 1], "x_axis": [1, 0, 0]},
+     "points": {"o": [0, 0], "p": [45, 0]},
+     "slots": {"arm": {"from": "o", "to": "p", "width": "arm_w"}},
+     "constraints": [
+       {"type": "fix", "point": "o", "at": [0, 0]},
+       {"type": "fix", "point": "p", "at": ["crank", 0]}
+     ]},
+    {"id": "arm", "type": "extrude", "sketch": "arm_sk", "distance": "thick"},
+    {"id": "hub_blank", "type": "cylinder", "radius": "hub_d/2", "height": "thick",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": false},
+    {"id": "hubbed", "type": "fuse", "target": "arm", "tool": "hub_blank"},
+    {"id": "pin_blank", "type": "cylinder", "radius": "pin_d/2", "height": "pin_len",
+     "at": ["crank", 0, "thick"], "axis": [0, 0, 1], "centred": false},
+    {"id": "driver", "type": "fuse", "target": "hubbed", "tool": "pin_blank"},
+    {"id": "eased", "type": "chamfer", "body": "driver", "distance": "ease",
+     "edges": {"of_face": "pin_blank/+z"}}
+  ],
+  "result": "eased"
+}

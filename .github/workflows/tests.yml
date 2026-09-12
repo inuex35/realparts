@@ -1,0 +1,221 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # every wheel the kernel pins is published for 3.12 and 3.13; this
+          # pins the older of the two so the build is the same one twice
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the kernel
+        # -sim, not the plain file: the studies are optional to *use* and not
+        # optional to test, so CI takes the whole set
+        run: |
+          python -m pip install --upgrade pip
+          # ezdxf reads the DXF back; jsonschema checks the schema this
+          # server publishes against the documents it ships as examples
+          pip install -r requirements-sim.txt pytest pytest-xdist ezdxf jsonschema
+
+      - name: Tests
+        # -n auto: the suite is 345 s on one core and 118 s on eight, and it
+        # stops improving there -- the floor is one 39 s test (a tapped hole
+        # patterned six times) plus OpenCASCADE's own threads competing with
+        # the workers. Nothing is skipped or shortened to get it.
+        run: python -m pytest -q -n auto
+
+      - name: References survive a parameter change
+        run: |
+          python -m cadcore fuzz examples/bracket.json -n 60
+          python -m cadcore fuzz examples/flange.json -n 60
+          python -m cadcore fuzz examples/sketch_plate.json -n 60
+
+      - name: Editing sessions hold their invariants
+        run: |
+          python -m cadcore soak examples/sketch_plate.json -n 60 --seed 1
+          python -m cadcore soak examples/bracket.json -n 30 --seed 2
+
+      - name: The examples still export, draw and check
+        run: |
+          python -m cadcore export examples/bracket.json --out /tmp/bracket.step
+          python -m cadcore drawing examples/flange.json --out /tmp/flange.svg
+          python -m cadcore interference examples/assembly.json
+          python -m cadcore freedom examples/assembly_solved.json
+          python -m cadcore repair examples/bracket.json
+          python cadcore/evaluation/tests/golden.py > /dev/null      # every example still builds
+          python -m cadcore mesh examples/cup.json --out /tmp/cup.stl
+
+      - name: Surfaces, threads and sheet metal build
+        run: |
+          python -m cadcore build examples/fairing.json
+          python -m cadcore build examples/bottle.json
+          python -m cadcore build examples/sheet_bracket.json
+          python -m cadcore unfold examples/sheet_bracket.json --out /tmp/blank.dxf
+          python -m cadcore print-check examples/cup.json --wall 1.5
+
+      - name: The mechanisms turn, and say so when they cannot
+        run: |
+          python -m cadcore.mechanism.scene four_bar /tmp/four_bar.json 36
+          python -m cadcore.mechanism.scene slider_crank /tmp/slider_crank.json 36
+          python -m cadcore.mechanism.scene scotch_yoke /tmp/scotch_yoke.json 36
+          python -m cadcore.mechanism.scene geneva /tmp/geneva.json 36
+          python -m cadcore.mechanism.scene planetary /tmp/planetary.json 12
+
+      - name: The sheet clip's README claims are claims a check makes
+        run: |
+          python -m cadcore print-check examples/sheet_knob.json
+          python -m cadcore build examples/sheet_collar.json
+          python -m cadcore interference examples/sheet_clip.json
+          python -m cadcore export examples/sheet_knob.json --out /tmp/knob.stl
+          python -m cadcore bom examples/assembly.json
+
+  addon:
+    # The add-on layer was the only part outside CI, which is exactly where the
+    # last two bugs were hiding: a NameError on the one path no check exercised,
+    # and a claim that properties were not registering that nothing could settle.
+    #
+    # Two platforms and no virtualenv, on purpose. A buyer has Blender and
+    # nothing else, so this job has Blender and nothing else: the kernel is
+    # installed by Blender's own Python into the prefix the add-on's Install
+    # button fills, and the add-on has to find it there. Windows because that
+    # is where the buyers are, and because a path spelled out for Linux is the
+    # one that is right on the machine it was written on.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      BLENDER_VERSION: "5.2.1"
+      BLENDER_SERIES: "5.2"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch Blender
+        run: |
+          base="https://download.blender.org/release/Blender${BLENDER_SERIES}"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            curl -fsSL -A "Mozilla/5.0" "$base/blender-${BLENDER_VERSION}-windows-x64.zip" -o blender.zip
+            unzip -q blender.zip && mv "blender-${BLENDER_VERSION}-windows-x64" blender
+            BLENDER="$PWD/blender/blender.exe"
+            BLENDER_PY="$PWD/blender/${BLENDER_SERIES}/python/bin/python.exe"
+          else
+            curl -fsSL -A "Mozilla/5.0" "$base/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o blender.tar.xz
+            mkdir -p blender && tar -xf blender.tar.xz -C blender --strip-components=1
+            BLENDER="$PWD/blender/blender"
+            BLENDER_PY="$PWD/blender/${BLENDER_SERIES}/python/bin/python3.13"
+          fi
+          # for the steps after this one -- a value written to GITHUB_ENV is not
+          # visible in the step that wrote it, which is how this step once ran
+          # an empty string as a command on both platforms
+          { echo "BLENDER=$BLENDER"; echo "BLENDER_PY=$BLENDER_PY"; } >> "$GITHUB_ENV"
+          "$BLENDER" --version
+          "$BLENDER_PY" --version
+
+      - name: Where pip keeps its cache
+        # ~/.cache/pip on Linux and %LOCALAPPDATA%\pip\Cache on Windows; asking
+        # pip is the only spelling that is right on both
+        id: pipcache
+        run: echo "dir=$("$BLENDER_PY" -m pip cache dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the kernel's wheels
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pipcache.outputs.dir }}
+          key: kernel-${{ runner.os }}-${{ hashFiles('requirements-sim.txt', 'requirements.txt') }}
+
+      - name: Install the kernel the way the add-on's button does
+        # the same command `CADCORE_OT_install_kernel` runs: Blender's own
+        # interpreter, a prefix of ours, nothing else on the machine
+        run: |
+          "$BLENDER_PY" -m pip install --upgrade --ignore-installed \
+            --prefix ".kernel/cp313" -r requirements-sim.txt
+
+      - name: Install the add-on
+        # into a user scripts directory of our own, named to Blender through
+        # BLENDER_USER_SCRIPTS, so that neither APPDATA nor HOME is involved.
+        # A link, so that the add-on's `repo_root()` -- the real path of its
+        # own directory, one up -- lands in this checkout: a junction on
+        # Windows, which needs no privilege and which Python's realpath
+        # resolves. Through PowerShell, because `cmd.exe /c mklink` run from
+        # bash on the runner opened a prompt and linked nothing
+        run: |
+          mkdir -p user_scripts/addons
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pwsh -NoProfile -Command "New-Item -ItemType Junction -Path '$(cygpath -w "$PWD/user_scripts/addons/cadcore_bridge")' -Target '$(cygpath -w "$PWD/blender_addon")' | Out-Null"
+            echo "BLENDER_USER_SCRIPTS=$(cygpath -w "$PWD/user_scripts")" >> "$GITHUB_ENV"
+          else
+            ln -s "$PWD/blender_addon" user_scripts/addons/cadcore_bridge
+            echo "BLENDER_USER_SCRIPTS=$PWD/user_scripts" >> "$GITHUB_ENV"
+          fi
+          ls -la user_scripts/addons/cadcore_bridge/ | head -3
+
+      - name: The round trip, without a window
+        run: |
+          set -o pipefail
+          # `blender -b -P` exits 0 even when the script raises, so the run is
+          # only green if the script says so itself
+          "$BLENDER" -b -noaudio --factory-startup \
+            -P tools/verify/verify_addon.py 2>&1 | tee verify.log
+          grep -q "VERIFY RESULT all ok" verify.log
+          # and it really was the buyer's path, not a venv nobody made
+          grep -q "Blender's own, so a buyer installs nothing first ok" verify.log
+
+      - name: A random walk through the add-on
+        # verify_addon replays one path; this walks a random one -- pick,
+        # tool, undo, roll back, remove -- and fails on any traceback
+        run: |
+          set -o pipefail
+          for seed in 1 2 3 6; do
+            "$BLENDER" -b -noaudio --factory-startup \
+              -P tools/verify/soak_addon.py -- 60 "$seed" 2>&1 | tee "soak_$seed.log"
+            grep -q "SOAK RESULT all ok" "soak_$seed.log"
+          done
+
+      - name: The zip a buyer gets, into a Blender that has never seen it
+        run: |
+          set -o pipefail
+          "$BLENDER_PY" tools/package.py build
+          mkdir -p fresh/scripts fresh/config
+          # whole paths through cygpath, not a converted root with POSIX
+          # segments appended: the mixed spelling reached Blender's config
+          # path and a check comparing paths as strings could not match it
+          native() { if [ "$RUNNER_OS" = "Windows" ]; then cygpath -w "$1"; else echo "$1"; fi; }
+          BLENDER_USER_SCRIPTS="$(native "$PWD/fresh/scripts")" \
+          BLENDER_USER_CONFIG="$(native "$PWD/fresh/config")" \
+          CADCORE_KERNEL_PREFIX="$(native "$PWD/.kernel/cp313")" \
+            "$BLENDER" -b -noaudio --factory-startup \
+            -P tools/verify/verify_retail.py 2>&1 | tee retail.log
+          grep -q "RETAIL RESULT all ok" retail.log
+
+      - name: The same zip through the extensions door
+        # Blender 4.2+'s second way in: the manifest is read instead of bl_info
+        # and the module is bl_ext.user_default.cadcore_bridge. The validator is
+        # Blender's own; the install and use is ours
+        run: |
+          set -o pipefail
+          "$BLENDER" -b --factory-startup --command extension validate build/cadcore_bridge.zip
+          mkdir -p ext/extensions ext/scripts ext/config
+          native() { if [ "$RUNNER_OS" = "Windows" ]; then cygpath -w "$1"; else echo "$1"; fi; }
+          BLENDER_USER_EXTENSIONS="$(native "$PWD/ext/extensions")" \
+          BLENDER_USER_SCRIPTS="$(native "$PWD/ext/scripts")" \
+          BLENDER_USER_CONFIG="$(native "$PWD/ext/config")" \
+          CADCORE_KERNEL_PREFIX="$(native "$PWD/.kernel/cp313")" \
+            "$BLENDER" -b -noaudio --factory-startup \
+            -P tools/verify/verify_extension.py 2>&1 | tee extension.log
+          grep -q "EXTENSION RESULT all ok" extension.log

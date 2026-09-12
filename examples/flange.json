@@ -1,0 +1,347 @@
+{
+  "meta": {
+    "name": "bolted flange",
+    "note": "revolve a section, drill a bolt circle, chamfer the rim -- all by name"
+  },
+  "parameters": {
+    "bore": 50,
+    "hub_d": 84,
+    "hub_h": 26,
+    "flange_d": 140,
+    "flange_t": 14,
+    "bolt_d": 11,
+    "bolt_circle": 112,
+    "bolts": 6,
+    "chamfer": 2
+  },
+  "parameters_bounds": {
+    "bore": [
+      20,
+      70
+    ],
+    "hub_d": [
+      60,
+      110
+    ],
+    "hub_h": [
+      10,
+      40
+    ],
+    "flange_d": [
+      110,
+      190
+    ],
+    "flange_t": [
+      8,
+      24
+    ],
+    "bolt_d": [
+      6,
+      16
+    ],
+    "bolt_circle": [
+      90,
+      165
+    ],
+    "chamfer": [
+      0.5,
+      4
+    ]
+  },
+  "asserts": [
+    "hub_d > bore + 12",
+    "flange_d > hub_d + 14",
+    "hub_h > flange_t + 6",
+    "flange_d > bolt_circle + bolt_d + 8",
+    "bolt_circle > hub_d + bolt_d + 4",
+    "chamfer < flange_t/3"
+  ],
+  "features": [
+    {
+      "id": "section",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          -1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          25,
+          0
+        ],
+        "b": [
+          70,
+          0
+        ],
+        "c": [
+          70,
+          14
+        ],
+        "d": [
+          42,
+          14
+        ],
+        "e": [
+          42,
+          26
+        ],
+        "f": [
+          25,
+          26
+        ]
+      },
+      "lines": {
+        "base": [
+          "a",
+          "b"
+        ],
+        "rim": [
+          "b",
+          "c"
+        ],
+        "shoulder": [
+          "c",
+          "d"
+        ],
+        "hub": [
+          "d",
+          "e"
+        ],
+        "collar": [
+          "e",
+          "f"
+        ],
+        "bore": [
+          "f",
+          "a"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            "bore/2",
+            0
+          ]
+        },
+        {
+          "type": "horizontal",
+          "line": "base"
+        },
+        {
+          "type": "vertical",
+          "line": "rim"
+        },
+        {
+          "type": "horizontal",
+          "line": "shoulder"
+        },
+        {
+          "type": "vertical",
+          "line": "hub"
+        },
+        {
+          "type": "horizontal",
+          "line": "collar"
+        },
+        {
+          "type": "vertical",
+          "line": "bore"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "b"
+          ],
+          "value": "(flange_d - bore)/2"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "b",
+            "c"
+          ],
+          "value": "flange_t"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "c",
+            "d"
+          ],
+          "value": "(flange_d - hub_d)/2"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "d",
+            "e"
+          ],
+          "value": "hub_h - flange_t"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "e",
+            "f"
+          ],
+          "value": "(hub_d - bore)/2"
+        }
+      ]
+    },
+    {
+      "id": "body",
+      "type": "revolve",
+      "sketch": "section",
+      "angle": 360,
+      "axis": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "bolt",
+      "type": "cylinder",
+      "radius": "bolt_d/2",
+      "height": "flange_t*4",
+      "at": [
+        "bolt_circle/2",
+        0,
+        "flange_t/2"
+      ]
+    },
+    {
+      "id": "bolts",
+      "type": "pattern",
+      "body": "bolt",
+      "count": "bolts",
+      "axis": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "id": "drilled",
+      "type": "cut",
+      "target": "body",
+      "tool": "bolts"
+    },
+    {
+      "id": "eased",
+      "type": "chamfer",
+      "body": "drilled",
+      "distance": "chamfer",
+      "edges": {
+        "between": [
+          "body/rim",
+          "body/base"
+        ]
+      }
+    }
+  ],
+  "result": "eased",
+  "drawing": {
+    "sheet": "A3",
+    "views": [
+      "front",
+      "top"
+    ],
+    "datums": {
+      "A": "body/base"
+    },
+    "datum_view": "front",
+    "dimensions": [
+      {
+        "view": "top",
+        "type": "diameter",
+        "faces": [
+          "body/rim"
+        ],
+        "offset": 26
+      },
+      {
+        "view": "top",
+        "type": "diameter",
+        "faces": [
+          "body/bore"
+        ],
+        "offset": 18
+      },
+      {
+        "view": "front",
+        "type": "linear",
+        "faces": [
+          "body/base",
+          "body/collar"
+        ],
+        "offset": 16
+      },
+      {
+        "view": "front",
+        "type": "linear",
+        "faces": [
+          "body/base",
+          "body/shoulder"
+        ],
+        "offset": 30
+      }
+    ],
+    "tolerances": [
+      {
+        "view": "front",
+        "face": "body/bore",
+        "kind": "cylindricity",
+        "value": 0.02,
+        "dx": 26,
+        "dy": 22
+      },
+      {
+        "view": "front",
+        "face": "body/base",
+        "kind": "perpendicularity",
+        "value": 0.05,
+        "datums": [
+          "A"
+        ],
+        "dx": -40,
+        "dy": 14
+      }
+    ],
+    "title": {
+      "part": "bolted flange",
+      "material": "S45C",
+      "finish": "black oxide"
+    }
+  }
+}

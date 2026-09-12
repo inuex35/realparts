@@ -1,0 +1,19 @@
+{
+  "meta": {"name": "piston", "material": "A6061",
+           "note": "a slider that is a body rather than a link: it keeps its heading and only moves along the bore. The wrist pin runs out of the plane, so the rod can swing"},
+  "parameters": {"bore": 34.0, "height": 28.0, "pin_d": 6.0, "wall": 3.0, "ease": 1.0},
+  "parameters_bounds": {"bore": [16.0, 80.0], "height": [12.0, 60.0], "pin_d": [3.0, 16.0]},
+  "asserts": ["pin_d < bore - 4*wall", "height > pin_d + 2*wall", "ease < wall"],
+  "features": [
+    {"id": "blank", "type": "cylinder", "radius": "bore/2", "height": "height",
+     "at": [0, 0, 0], "axis": [1, 0, 0], "centred": true},
+    {"id": "crown", "type": "chamfer", "body": "blank", "distance": "ease",
+     "edges": {"of_face": "blank/+x"}},
+    {"id": "skirt", "type": "chamfer", "body": "crown", "distance": "ease",
+     "edges": {"of_face": "blank/-x"}},
+    {"id": "pin", "type": "cylinder", "radius": "pin_d/2", "height": "bore*1.5",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": true},
+    {"id": "wrist", "type": "cut", "target": "skirt", "tool": "pin"}
+  ],
+  "result": "wrist"
+}

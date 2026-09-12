@@ -1,0 +1,49 @@
+{
+ "id": "strength_driven_hole",
+ "prompt": "Design a cantilever tab in aluminium 6061 (yield 276 MPa): 120 mm long and 40 mm wide, fixed over its whole 40 mm end face, carrying 500 N downward spread over the far end face. A 10 mm diameter through hole is centred on the width, 15 mm from the fixed end. Choose the thickness (a whole number of millimetres, at least 4 and at most 20) so that the safety factor against yield is at least 2.0 under that load -- and no thicker than you need: the part should be as light as you can make it while meeting the safety factor. State the thickness you chose and why.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox_range",
+   "extents": [
+    [
+     4,
+     20
+    ],
+    [
+     39.5,
+     40.5
+    ],
+    [
+     119.5,
+     120.5
+    ]
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 5.0,
+   "count": 1
+  },
+  {
+   "type": "fem",
+   "mode": "cantilever",
+   "force": [
+    0,
+    0,
+    -500
+   ],
+   "sf_min": 2.0,
+   "material": "A6061"
+  },
+  {
+   "type": "volume",
+   "between": [
+    0,
+    75543.36293856408
+   ]
+  }
+ ]
+}

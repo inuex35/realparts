@@ -1,0 +1,29 @@
+{
+  "meta": {"name": "sketched plate", "note": "sketch -> constraints -> extrude -> fillet -> STEP"},
+  "parameters": {"width": 90, "depth": 60, "notch": 18, "thickness": 8, "corner_r": 8},
+  "parameters_bounds": {"width": [60, 130], "depth": [40, 90], "notch": [8, 30],
+                        "thickness": [4, 14], "corner_r": [3, 12]},
+  "asserts": ["notch < depth/2 - 5", "corner_r < min(width, depth)/4", "notch > corner_r"],
+  "features": [
+    {"id": "profile", "type": "sketch",
+     "plane": {"origin": [0, 0, 0], "normal": [0, 0, 1], "x_axis": [1, 0, 0]},
+     "points": {"o": [0, 0], "a": [90, 0], "b": [90, 42], "c": [72, 60], "d": [0, 60]},
+     "lines": {"front": ["o", "a"], "right": ["a", "b"], "chamfer": ["b", "c"],
+               "back": ["c", "d"], "left": ["d", "o"]},
+     "constraints": [
+       {"type": "fix", "point": "o", "at": [0, 0]},
+       {"type": "horizontal", "line": "front"},
+       {"type": "vertical", "line": "right"},
+       {"type": "horizontal", "line": "back"},
+       {"type": "vertical", "line": "left"},
+       {"type": "distance", "points": ["o", "a"], "value": "width"},
+       {"type": "distance", "points": ["o", "d"], "value": "depth"},
+       {"type": "distance", "points": ["b", "a"], "value": "depth - notch"},
+       {"type": "distance", "points": ["c", "d"], "value": "width - notch"}
+     ]},
+    {"id": "plate", "type": "extrude", "sketch": "profile", "distance": "thickness"},
+    {"id": "rounded", "type": "fillet", "body": "plate", "radius": "corner_r",
+     "edges": {"between": ["plate/front", "plate/left"]}}
+  ],
+  "result": "rounded"
+}

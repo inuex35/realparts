@@ -1,0 +1,39 @@
+{
+ "id": "flanged_bushing",
+ "prompt": "Make a flanged bushing: a cylinder 30 mm outside diameter and 40 mm long with a 20 mm diameter bore straight through, and a flange 50 mm in diameter and 5 mm thick at one end (the flange is part of the 40 mm overall length). Chamfer the outer edge of the flange by 1 mm.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    50,
+    50,
+    40
+   ]
+  },
+  {
+   "type": "volume",
+   "between": [
+    21331.414117874694,
+    22211.060060879838
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 10.0,
+   "count": 1
+  },
+  {
+   "type": "cylinders",
+   "radius": 15.0,
+   "at_least": 1
+  },
+  {
+   "type": "cylinders",
+   "radius": 25.0,
+   "at_least": 1
+  }
+ ]
+}

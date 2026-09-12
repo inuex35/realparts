@@ -1,0 +1,267 @@
+{
+ "meta": {
+  "name": "intake_cowl",
+  "note": "built from surfaces: a skinned duct, extended, trimmed square, patched at the nose, sewn, offset, capped into a solid and reopened at the back"
+ },
+ "parameters": {
+  "mouth_r": 34,
+  "waist_r": 27,
+  "throat_r": 30,
+  "waist_z": 40,
+  "throat_z": 90,
+  "flare": 8,
+  "cut_z": 118,
+  "wall": 1.5
+ },
+ "parameters_bounds": {
+  "mouth_r": [
+   20,
+   60
+  ],
+  "waist_r": [
+   15,
+   50
+  ],
+  "throat_r": [
+   18,
+   55
+  ],
+  "throat_z": [
+   50,
+   160
+  ],
+  "wall": [
+   0.5,
+   4.0
+  ],
+  "flare": [
+   0,
+   25
+  ]
+ },
+ "asserts": [
+  "waist_r < mouth_r",
+  "waist_r < throat_r",
+  "waist_z < throat_z",
+  "wall*4 < waist_r"
+ ],
+ "result": "cowl",
+ "features": [
+  {
+   "id": "mouth",
+   "type": "sketch",
+   "plane": {
+    "origin": [
+     0,
+     0,
+     0
+    ],
+    "normal": [
+     0,
+     0,
+     1
+    ],
+    "x_axis": [
+     1,
+     0,
+     0
+    ]
+   },
+   "points": {
+    "o": [
+     0,
+     0
+    ]
+   },
+   "circles": {
+    "rim": {
+     "centre": "o",
+     "radius": "mouth_r"
+    }
+   },
+   "constraints": [
+    {
+     "type": "fix",
+     "point": "o",
+     "at": [
+      0,
+      0
+     ]
+    },
+    {
+     "type": "radius",
+     "circle": "rim",
+     "value": "mouth_r"
+    }
+   ]
+  },
+  {
+   "id": "waist",
+   "type": "sketch",
+   "plane": {
+    "origin": [
+     0,
+     0,
+     40
+    ],
+    "normal": [
+     0,
+     0,
+     1
+    ],
+    "x_axis": [
+     1,
+     0,
+     0
+    ]
+   },
+   "points": {
+    "o": [
+     0,
+     0
+    ]
+   },
+   "circles": {
+    "rim": {
+     "centre": "o",
+     "radius": "waist_r"
+    }
+   },
+   "constraints": [
+    {
+     "type": "fix",
+     "point": "o",
+     "at": [
+      0,
+      0
+     ]
+    },
+    {
+     "type": "radius",
+     "circle": "rim",
+     "value": "waist_r"
+    }
+   ]
+  },
+  {
+   "id": "throat",
+   "type": "sketch",
+   "plane": {
+    "origin": [
+     0,
+     0,
+     90
+    ],
+    "normal": [
+     0,
+     0,
+     1
+    ],
+    "x_axis": [
+     1,
+     0,
+     0
+    ]
+   },
+   "points": {
+    "o": [
+     0,
+     0
+    ]
+   },
+   "circles": {
+    "rim": {
+     "centre": "o",
+     "radius": "throat_r"
+    }
+   },
+   "constraints": [
+    {
+     "type": "fix",
+     "point": "o",
+     "at": [
+      0,
+      0
+     ]
+    },
+    {
+     "type": "radius",
+     "circle": "rim",
+     "value": "throat_r"
+    }
+   ]
+  },
+  {
+   "id": "duct",
+   "type": "surface",
+   "method": "skin",
+   "sketches": [
+    "mouth",
+    "waist",
+    "throat"
+   ]
+  },
+  {
+   "id": "flared",
+   "type": "extend",
+   "body": "duct",
+   "face": "duct/rim",
+   "distance": "flare"
+  },
+  {
+   "id": "knife",
+   "type": "box",
+   "size": [
+    200,
+    200,
+    40
+   ],
+   "at": [
+    0,
+    0,
+    "cut_z"
+   ]
+  },
+  {
+   "id": "scarf",
+   "type": "trim",
+   "body": "flared",
+   "tool": "knife",
+   "keep": "outside"
+  },
+  {
+   "id": "nose",
+   "type": "fill",
+   "body": "scarf",
+   "loop": 0,
+   "continuity": "G1"
+  },
+  {
+   "id": "skin",
+   "type": "sew",
+   "bodies": [
+    "scarf",
+    "nose"
+   ],
+   "solid": false
+  },
+  {
+   "id": "outer",
+   "type": "offset_surface",
+   "body": "skin",
+   "distance": "wall"
+  },
+  {
+   "id": "closed",
+   "type": "cap",
+   "body": "outer"
+  },
+  {
+   "id": "cowl",
+   "type": "delete_face",
+   "body": "closed",
+   "face": "closed_p0/patch",
+   "heal": false
+  }
+ ]
+}

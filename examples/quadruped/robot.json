@@ -1,0 +1,307 @@
+{
+  "meta": {
+    "name": "quadruped",
+    "note": "a four-legged walker, sized to a Sony aibo ERS-1000: standing it measures 305 x 180 x 294 mm against the aibo's 305 x 180 x 293, and the box grows to 375 long over a stride, because a stride is longer than a dog. One chassis and eight bones, every bone the same parametric link at a different centre distance. Each joint is a concentric mate whose angle is a parameter, so a gait is eight numbers per frame, and every angle is 0 for a leg hanging straight down. `cad interference` is clear at every pose of that gait, which is a thing worth checking rather than assuming: it was not, and the front and back feet walked through each other"
+  },
+  "parameters": {
+    "body_len": 242.0,
+    "body_wide": 142.0,
+    "hip_inset": 23.0,
+    "pin_d": 10.0,
+    "fit": 0.4,
+    "femur": 88.0,
+    "tibia": 104.0,
+    "bone_wide": 24.0,
+    "bone_thick": 8.0,
+    "hip_fl": 0.0,
+    "knee_fl": 0.0,
+    "hip_fr": 0.0,
+    "knee_fr": 0.0,
+    "hip_bl": 0.0,
+    "knee_bl": 0.0,
+    "hip_br": 0.0,
+    "knee_br": 0.0,
+    "neck_high": 28.0,
+    "head_len": 78.0,
+    "head_wide": 62.0,
+    "head_high": 38.0,
+    "muzzle": 39.0
+  },
+  "parameter_units": {
+    "hip_fl": "angle",
+    "knee_fl": "angle",
+    "hip_fr": "angle",
+    "knee_fr": "angle",
+    "hip_bl": "angle",
+    "knee_bl": "angle",
+    "hip_br": "angle",
+    "knee_br": "angle"
+  },
+  "parameters_bounds": {
+    "femur": [
+      40.0,
+      140.0
+    ],
+    "tibia": [
+      40.0,
+      160.0
+    ],
+    "body_len": [
+      80.0,
+      300.0
+    ],
+    "body_wide": [
+      40.0,
+      200.0
+    ],
+    "hip_inset": [
+      10.0,
+      60.0
+    ]
+  },
+  "features": [
+    {
+      "id": "body",
+      "type": "part",
+      "document": "parts/body.json",
+      "parameters": {
+        "pin_d": "pin_d",
+        "length": "body_len",
+        "width": "body_wide",
+        "hip_dx": "body_len/2 - hip_inset",
+        "neck_high": "neck_high",
+        "head_len": "head_len",
+        "head_wide": "head_wide",
+        "head_high": "head_high",
+        "muzzle": "muzzle"
+      },
+      "note": "hip_dx is passed, and has to be: the part's own default puts the four pins 110 mm apart, which on a 238 mm plate bunches every leg at the middle and walks the front and back feet into each other. The pins belong at the corners, so they are placed from body_len"
+    },
+    {
+      "id": "femur_fl",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "femur",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "tibia_fl",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "tibia",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "femur_fr",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "femur",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "tibia_fr",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "tibia",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "femur_bl",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "femur",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "tibia_bl",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "tibia",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "femur_br",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "femur",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "tibia_br",
+      "type": "part",
+      "document": "../mechanism/link.json",
+      "parameters": {
+        "centres": "tibia",
+        "hole_d": "pin_d + fit",
+        "width": "bone_wide",
+        "thick": "bone_thick"
+      }
+    },
+    {
+      "id": "hip_fl",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "femur_fl",
+      "to": "body",
+      "faces": [
+        "femur_fl:pin_a/bore",
+        "body:pin_fl/side"
+      ],
+      "angle": "180 + hip_fl",
+      "flip": false,
+      "note": "the hip: the femur turns on the body's pin. The 180 is where a concentric mate's own frame happens to land -- measured, not guessed -- so that the parameter reads 0 for a leg hanging straight"
+    },
+    {
+      "id": "knee_fl",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "tibia_fl",
+      "to": "hip_fl",
+      "faces": [
+        "tibia_fl:pin_a/bore",
+        "femur_fl:pin_b/bore"
+      ],
+      "angle": "180 + knee_fl",
+      "offset": "bone_thick",
+      "flip": false,
+      "note": "the knee, on the far end of the femur the hip just placed. Its angle is the shin's from *vertical*, not from the thigh, and the old note here said the opposite: a mate turns the moved part about the target axis, and this target is the femur's bore, whose direction does not change when the hip turns. So hip 26 with knee 0 is a thigh swung forward under a shin still hanging plumb -- which is why a gait that held the knee at 0 and swung the hip walked the foot along a circle and lifted it 9 mm off the ground at each end of its own stance. The offset steps the tibia one thickness along the bore so it lies beside the femur rather than through it; the sign is per side because one scalar along the bore is outboard on the left and inboard on the right. Measured, not reasoned"
+    },
+    {
+      "id": "hip_fr",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "femur_fr",
+      "to": "body",
+      "faces": [
+        "femur_fr:pin_a/bore",
+        "body:pin_fr/side"
+      ],
+      "angle": "180 + hip_fr",
+      "flip": false,
+      "note": "the hip: the femur turns on the body's pin. The 180 is where a concentric mate's own frame happens to land -- measured, not guessed -- so that the parameter reads 0 for a leg hanging straight"
+    },
+    {
+      "id": "knee_fr",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "tibia_fr",
+      "to": "hip_fr",
+      "faces": [
+        "tibia_fr:pin_a/bore",
+        "femur_fr:pin_b/bore"
+      ],
+      "angle": "180 + knee_fr",
+      "offset": "-bone_thick",
+      "flip": false,
+      "note": "the knee, on the far end of the femur the hip just placed. Its angle is the shin's from *vertical*, not from the thigh, and the old note here said the opposite: a mate turns the moved part about the target axis, and this target is the femur's bore, whose direction does not change when the hip turns. So hip 26 with knee 0 is a thigh swung forward under a shin still hanging plumb -- which is why a gait that held the knee at 0 and swung the hip walked the foot along a circle and lifted it 9 mm off the ground at each end of its own stance. The offset steps the tibia one thickness along the bore so it lies beside the femur rather than through it; the sign is per side because one scalar along the bore is outboard on the left and inboard on the right. Measured, not reasoned"
+    },
+    {
+      "id": "hip_bl",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "femur_bl",
+      "to": "body",
+      "faces": [
+        "femur_bl:pin_a/bore",
+        "body:pin_bl/side"
+      ],
+      "angle": "180 + hip_bl",
+      "flip": false,
+      "note": "the hip: the femur turns on the body's pin. The 180 is where a concentric mate's own frame happens to land -- measured, not guessed -- so that the parameter reads 0 for a leg hanging straight"
+    },
+    {
+      "id": "knee_bl",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "tibia_bl",
+      "to": "hip_bl",
+      "faces": [
+        "tibia_bl:pin_a/bore",
+        "femur_bl:pin_b/bore"
+      ],
+      "angle": "180 + knee_bl",
+      "offset": "bone_thick",
+      "flip": false,
+      "note": "the knee, on the far end of the femur the hip just placed. Its angle is the shin's from *vertical*, not from the thigh, and the old note here said the opposite: a mate turns the moved part about the target axis, and this target is the femur's bore, whose direction does not change when the hip turns. So hip 26 with knee 0 is a thigh swung forward under a shin still hanging plumb -- which is why a gait that held the knee at 0 and swung the hip walked the foot along a circle and lifted it 9 mm off the ground at each end of its own stance. The offset steps the tibia one thickness along the bore so it lies beside the femur rather than through it; the sign is per side because one scalar along the bore is outboard on the left and inboard on the right. Measured, not reasoned"
+    },
+    {
+      "id": "hip_br",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "femur_br",
+      "to": "body",
+      "faces": [
+        "femur_br:pin_a/bore",
+        "body:pin_br/side"
+      ],
+      "angle": "180 + hip_br",
+      "flip": false,
+      "note": "the hip: the femur turns on the body's pin. The 180 is where a concentric mate's own frame happens to land -- measured, not guessed -- so that the parameter reads 0 for a leg hanging straight"
+    },
+    {
+      "id": "knee_br",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "tibia_br",
+      "to": "hip_br",
+      "faces": [
+        "tibia_br:pin_a/bore",
+        "femur_br:pin_b/bore"
+      ],
+      "angle": "180 + knee_br",
+      "offset": "-bone_thick",
+      "flip": false,
+      "note": "the knee, on the far end of the femur the hip just placed. Its angle is the shin's from *vertical*, not from the thigh, and the old note here said the opposite: a mate turns the moved part about the target axis, and this target is the femur's bore, whose direction does not change when the hip turns. So hip 26 with knee 0 is a thigh swung forward under a shin still hanging plumb -- which is why a gait that held the knee at 0 and swung the hip walked the foot along a circle and lifted it 9 mm off the ground at each end of its own stance. The offset steps the tibia one thickness along the bore so it lies beside the femur rather than through it; the sign is per side because one scalar along the bore is outboard on the left and inboard on the right. Measured, not reasoned"
+    },
+    {
+      "id": "robot",
+      "type": "assemble",
+      "bodies": [
+        "body",
+        "hip_fl",
+        "hip_fr",
+        "hip_bl",
+        "hip_br",
+        "knee_fl",
+        "knee_fr",
+        "knee_bl",
+        "knee_br"
+      ]
+    }
+  ],
+  "result": "robot",
+  "asserts": [
+    "body_len + muzzle + head_len/2 > 250",
+    "femur + tibia > body_len / 3",
+    "head_wide < body_wide",
+    "hip_inset > pin_d"
+  ]
+}

@@ -1,0 +1,81 @@
+name: macOS wheels
+
+# PyPI has no macOS wheel for planegcs, the sketch solver, so `tools/package.py`
+# cannot build a macOS zip on its own. This builds that one wheel on a Mac and
+# leaves it as an artifact; `--extra-wheels=<folder>` feeds it back in.
+#
+# By hand, not on every push: a macOS runner is billed at ten times a Linux one
+# and the wheel only changes when the pin in requirements.txt does.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  wheel:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS runners are Apple Silicon. The Intel wheel is cross-compiled
+          # from the same machine, so it is built but never run.
+          - arch: arm64
+            platform: macos-arm64
+          - arch: x86_64
+            platform: macos-x64
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Eigen and Boost
+        # planegcs needs headers from both and links neither, so the arm64
+        # brew install is right for the Intel build too
+        run: brew install eigen boost
+
+      - name: Fetch the source of the version the kernel pins
+        # cibuildwheel builds a source tree, not a name on PyPI, so the sdist
+        # comes down first. planegcs publishes one; its own release workflow
+        # builds Linux and Windows from it, and only the macOS leg is missing.
+        id: pin
+        run: |
+          version=$(sed -n 's/^planegcs==\([^ #]*\).*/\1/p' requirements.txt)
+          test -n "$version"
+          echo "planegcs=$version" >> "$GITHUB_OUTPUT"
+          url=$(curl -fsSL "https://pypi.org/pypi/planegcs/$version/json" \
+                | jq -r '.urls[] | select(.packagetype=="sdist") | .url')
+          curl -fsSL "$url" -o planegcs.tar.gz
+          tar -xzf planegcs.tar.gz
+          mv "planegcs-$version" source
+
+      - name: Build the wheel
+        uses: pypa/cibuildwheel@v2.21.3
+        env:
+          CIBW_BUILD: "cp313-macosx_*"
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+          # 11.0 for both: tools/package.py matches a supplied wheel by the tag
+          # in its filename, and the tags it asks for are macosx_11_0_*
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+          CIBW_ENVIRONMENT: 'CMAKE_PREFIX_PATH=/opt/homebrew:/usr/local MACOSX_DEPLOYMENT_TARGET=11.0'
+          CIBW_TEST_COMMAND: 'python -c "import planegcs; planegcs.SketchSolver()"'
+        with:
+          package-dir: source
+          output-dir: wheels
+
+      - name: The zip a Mac buyer gets
+        # the rest of the kernel does have macOS wheels, so with this one in
+        # hand the whole add-on can be packed here
+        run: |
+          python tools/package.py build/mac --${{ matrix.platform }} --extra-wheels=wheels
+          ls -la build/mac
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: |
+            wheels/*.whl
+            build/mac/*.zip

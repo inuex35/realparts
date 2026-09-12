@@ -1,0 +1,28 @@
+{
+ "id": "enclosure_shell",
+ "prompt": "Make an open-topped enclosure: outside 100 mm by 60 mm by 30 mm tall, with 2 mm walls and a 2 mm floor, open at the top.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    100,
+    60,
+    30
+   ]
+  },
+  {
+   "type": "volume",
+   "between": [
+    28587.84,
+    30356.16
+   ]
+  },
+  {
+   "type": "printable",
+   "min_wall": 1.5
+  }
+ ]
+}

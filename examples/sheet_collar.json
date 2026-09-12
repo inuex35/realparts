@@ -1,0 +1,314 @@
+{
+  "meta": {
+    "name": "sheet clip -- collar",
+    "material": "PLA",
+    "note": "the keyhole plate: the fabric-wrapped knob passes through the mouth and is slid into the slot, and the elastic pulls from beyond the mouth so the load drives the knob further in"
+  },
+  "parameters": {
+    "plate_l": 30.0,
+    "plate_w": 28.0,
+    "plate_t": 5.0,
+    "mouth_r": 10.0,
+    "mouth_x": -8.0,
+    "key_w": 9.0,
+    "key_end": 17.0,
+    "loop_x": -23.0,
+    "loop_half": 6.5,
+    "loop_w": 4.5,
+    "ease": 0.6
+  },
+  "parameters_bounds": {
+    "plate_w": [
+      22.0,
+      40.0
+    ],
+    "plate_t": [
+      3.0,
+      8.0
+    ],
+    "mouth_r": [
+      7.0,
+      15.0
+    ],
+    "key_w": [
+      6.0,
+      14.0
+    ],
+    "loop_w": [
+      3.0,
+      8.0
+    ],
+    "ease": [
+      0.2,
+      1.5
+    ]
+  },
+  "asserts": [
+    "mouth_r < plate_w/2 - 3.0",
+    "key_w < 2 * mouth_r - 4.0",
+    "loop_half + loop_w/2 < plate_w/2 - 2.0",
+    "loop_x + loop_w/2 < mouth_x - mouth_r - 2.0",
+    "key_end + key_w/2 < plate_l + plate_w/2 - 4.0",
+    "ease < plate_t/3"
+  ],
+  "features": [
+    {
+      "id": "outline",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "p": [
+          -15,
+          0
+        ],
+        "q": [
+          15,
+          0
+        ]
+      },
+      "slots": {
+        "body": {
+          "from": "p",
+          "to": "q",
+          "width": "plate_w"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "p",
+          "at": [
+            -15,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "q",
+          "at": [
+            15,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plate",
+      "type": "extrude",
+      "sketch": "outline",
+      "distance": "plate_t"
+    },
+    {
+      "id": "mouth_sk",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          5
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "m": [
+          -8,
+          0
+        ]
+      },
+      "circles": {
+        "mouth": {
+          "centre": "m",
+          "radius": "mouth_r"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "m",
+          "at": [
+            -8,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mouth",
+      "type": "pocket",
+      "body": "plate",
+      "sketch": "mouth_sk",
+      "until": "through_all"
+    },
+    {
+      "id": "key_sk",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          5
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "k0": [
+          -8,
+          0
+        ],
+        "k1": [
+          17,
+          0
+        ]
+      },
+      "slots": {
+        "key": {
+          "from": "k0",
+          "to": "k1",
+          "width": "key_w"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "k0",
+          "at": [
+            -8,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "k1",
+          "at": [
+            17,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keyway",
+      "type": "pocket",
+      "body": "mouth",
+      "sketch": "key_sk",
+      "until": "through_all"
+    },
+    {
+      "id": "loop_sk",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          5
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "l0": [
+          -23,
+          -6.5
+        ],
+        "l1": [
+          -23,
+          6.5
+        ]
+      },
+      "slots": {
+        "loop": {
+          "from": "l0",
+          "to": "l1",
+          "width": "loop_w"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "l0",
+          "at": [
+            -23,
+            -6.5
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "l1",
+          "at": [
+            -23,
+            6.5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collar",
+      "type": "pocket",
+      "body": "keyway",
+      "sketch": "loop_sk",
+      "until": "through_all"
+    },
+    {
+      "id": "eased_top",
+      "type": "chamfer",
+      "body": "collar",
+      "distance": "ease",
+      "edges": {
+        "of_face": "plate/top"
+      },
+      "note": "every edge the fabric can run over, on both faces, so a printed corner does not abrade it"
+    },
+    {
+      "id": "eased",
+      "type": "chamfer",
+      "body": "eased_top",
+      "distance": "ease",
+      "edges": {
+        "of_face": "plate/bottom"
+      }
+    }
+  ],
+  "result": "eased"
+}

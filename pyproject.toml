@@ -1,0 +1,91 @@
+# Packaging, so that pointing an assistant at this is one line rather than a
+# clone, a virtualenv and a PYTHONPATH:
+#
+#     uvx --from realparts cadcore-mcp
+#
+# Two things here are deliberate and would otherwise be quiet mistakes.
+#
+# The dependencies are *read from* requirements.txt rather than repeated. They
+# were already written there, with the reason for each one next to it, and a
+# second copy in this file is a copy that goes stale on the first version bump
+# -- with the pinned kernel in one place and the installed one in the other.
+#
+# `blender_addon/` and `tools/` are not here. The add-on is installed
+# into Blender's own Python, not pip's, and the bridge scripts are run with
+# `blender -P`; a wheel is the wrong shape for both, and a test walks the tree
+# to say which packages this list has to cover.
+#
+# `docs/` and `examples/` ship in the wheel. `cadcore.service.resources` serves them as
+# MCP resources, and an install is exactly the case where the reader cannot go
+# and look at the repository instead; a wheel without them would have listed
+# the manual on a checkout and nothing at all on the machine that needed it.
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "realparts"
+version = "0.2.4"
+description = "Parametric CAD with references that survive a parameter change"
+readme = "README.md"
+# planegcs 0.8 is built for 3.12 and up and cadquery-ocp 8.0 for 3.11 and up:
+# a claim of 3.10 was a pip resolution failure with a confusing message
+requires-python = ">=3.12"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{name = "inuex35"}]
+keywords = ["cad", "parametric", "opencascade", "brep", "mcp", "blender"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Manufacturing",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+# The FEM studies. Kept an extra for the reason requirements-sim.txt gives:
+# nothing pays for NGSolve until a study is asked for. A test holds this list
+# and that file to each other, because they are two copies of one fact.
+sim = ["ngsolve==6.2.2606", "scipy>=1.11"]
+
+[project.urls]
+Homepage = "https://github.com/inuex35/realparts"
+Source = "https://github.com/inuex35/realparts"
+
+[project.scripts]
+cadcore = "cadcore.service.cli:main"
+cadcore-mcp = "cadcore.service.mcp:main"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+packages = ["cadcore", "cadcore.model", "cadcore.sketching", "cadcore.geometry",
+            "cadcore.geometry.core", "cadcore.geometry.solids", "cadcore.geometry.assembly",
+            "cadcore.geometry.io",
+            "cadcore.features", "cadcore.features.declare", "cadcore.features.families",
+            "cadcore.evaluation", "cadcore.simulation", "cadcore.simulation.studies",
+            "cadcore.mechanism", "cadcore.analysis", "cadcore.ops", "cadcore.ops.subjects",
+            "cadcore.service",
+            "cadcore.docs", "cadcore.examples", "cadcore.examples.parts",
+            "cadcore.examples.previews"]
+
+[tool.setuptools.package-dir]
+"cadcore.docs" = "docs"
+"cadcore.examples" = "examples"
+"cadcore.examples.parts" = "examples/parts"
+"cadcore.examples.previews" = "examples/previews"
+
+[tool.setuptools.package-data]
+"*" = ["README.md"]
+"cadcore.service" = ["web_ui/*", "web_ui/assets/*"]
+"cadcore.docs" = ["*.md"]
+"cadcore.examples" = ["*.json"]
+"cadcore.examples.parts" = ["*.json"]
+"cadcore.examples.previews" = ["*.png"]
+
+[tool.pytest.ini_options]
+# every layer keeps its tests beside it, in a `tests/` of its own
+testpaths = ["cadcore", "blender_addon/tests", "native_app/tests", "tools"]

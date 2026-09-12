@@ -1,0 +1,27 @@
+.venv/
+# the kernel installed for Blender's own Python, by the add-on
+.kernel/
+__pycache__/
+*.pyc
+out/
+*.step
+# except the ones a test reads. `tests/data/*.step` are fixtures: files
+# from another kernel, with no naming provenance, which is the whole
+# point of them. Ignored, they were never committed, and every test that
+# reads one skipped on any machine but this one
+!**/tests/data/*.step
+build/
+dist/
+*.egg-info/
+
+# unsaved work the kernel writes beside a document, until it is saved
+*.autosave.json
+
+# gauntlet runs: transcripts, produced parts and scores are evidence, not source
+bench/results/
+bench/results_*.txt
+
+# written by "copy the assistant config"; it names paths on this machine
+assistant-*.json
+assistant-*.toml
+web_ui/node_modules/

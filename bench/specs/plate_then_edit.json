@@ -1,0 +1,56 @@
+{
+ "id": "plate_then_edit",
+ "prompt": "Two steps. Step 1: make a rectangular mounting plate, 80 mm by 60 mm, 6 mm thick, with four through holes of 6.6 mm diameter whose centres are 10 mm in from each edge, and round the four vertical corner edges with a 5 mm radius; export it as part_v1.step. Step 2: change that same plate to be 100 mm wide (still 60 mm deep, 6 mm thick) with 8.5 mm diameter holes, keeping the 10 mm insets and the 5 mm corners; export the changed plate as part.step. Both files must exist at the end.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    100,
+    60,
+    6
+   ]
+  },
+  {
+   "type": "volume",
+   "between": [
+    33819.17131305315,
+    35199.54565236145
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 4.25,
+   "count": 4
+  }
+ ],
+ "also": [
+  {
+   "file": "part_v1.step",
+   "checks": [
+    {
+     "type": "bbox",
+     "extents": [
+      80,
+      60,
+      6
+     ]
+    },
+    {
+     "type": "volume",
+     "between": [
+      27293.149197254315,
+      28407.155286938163
+     ]
+    },
+    {
+     "type": "cylinders",
+     "radius": 3.3,
+     "count": 4
+    }
+   ]
+  }
+ ]
+}

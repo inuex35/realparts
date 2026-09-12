@@ -1,0 +1,71 @@
+name: Product release
+
+on:
+  push:
+    tags: ["web-v*", "native-v*", "blender-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Read product and version
+        id: product
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          echo "target=${TAG%%-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#*-v}" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        if: steps.product.outputs.target == 'web'
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web_ui/package-lock.json
+      - name: Build Web UI
+        if: steps.product.outputs.target == 'web'
+        working-directory: web_ui
+        run: |
+          npm ci
+          npm run build
+      - name: Package
+        env:
+          PRODUCT: ${{ steps.product.outputs.target }}
+          VERSION: ${{ steps.product.outputs.version }}
+        run: python tools/package_release.py "$PRODUCT" "$VERSION"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: build/releases/*.zip
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: dist
+      - name: Create release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/*.zip --verify-tag --draft --latest=false \
+            --title "RealParts $TAG" \
+            --notes "Distribution: ${TAG%%-v*}. Web and Native archives include START.txt with Python setup instructions. Blender users install the add-on ZIP and then install the CAD kernel in its preferences."

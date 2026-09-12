@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "name": "bracket and bush, solved",
+    "note": "the same two parts as assembly.json, held by two mates solved together instead of one computed in order. Nothing here says how far in the bush goes: the seat is a face, and where the parts meet is the answer rather than the input"
+  },
+  "parameters": {
+    "bore": 14,
+    "clearance": 0.1
+  },
+  "features": [
+    {
+      "id": "base",
+      "type": "part",
+      "document": "bracket.json",
+      "parameters": {
+        "bore": "bore"
+      },
+      "note": "the bracket's bore is this assembly's bore: growing one grows the other, and `cad interference` is what says whether they still fit"
+    },
+    {
+      "id": "bush",
+      "type": "part",
+      "document": "parts/bush.json",
+      "parameters": {
+        "outer_d": "2*(bore - clearance)",
+        "inner_d": 20
+      },
+      "material": "SUS304"
+    },
+    {
+      "id": "asm",
+      "type": "assemble",
+      "bodies": [
+        "base",
+        "bush"
+      ],
+      "ground": "base",
+      "mates": [
+        {
+          "kind": "concentric",
+          "faces": [
+            "bush:barrel/side",
+            "base:bore_tool/side"
+          ],
+          "flip": false,
+          "note": "the barrel in the bore: two turns of freedom gone, and no offset, so it is still free to slide"
+        },
+        {
+          "kind": "planar",
+          "faces": [
+            "bush:flange/+z",
+            "base:wall/-y@1"
+          ],
+          "note": "and the flange against the outside of the wall, which is what actually stops it. assembly.json had to say seat: 10 -- measured from wherever OCCT keeps the bore's origin -- because one mate cannot hold a part in two ways"
+        }
+      ]
+    }
+  ],
+  "result": "asm"
+}

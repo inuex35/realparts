@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "name": "cast_cover",
+    "note": "a cast cover: a drafted plate, a lofted tower on a work plane, mirrored lugs, a rib and a bore"
+  },
+  "parameters": {
+    "plate_l": 90,
+    "plate_w": 60,
+    "plate_t": 14,
+    "taper": 4,
+    "tower_h": 26,
+    "tower_low": 22,
+    "tower_top": 13,
+    "corner_r": 48,
+    "lug_w": 18,
+    "lug_d": 10,
+    "lug_t": 8,
+    "bore_r": 6,
+    "bore_x": 30,
+    "rib_t": 4,
+    "rib_d": 12,
+    "boss_h": 3
+  },
+  "parameters_bounds": {
+    "plate_l": [
+      80,
+      105
+    ],
+    "plate_w": [
+      52,
+      70
+    ],
+    "plate_t": [
+      12,
+      20
+    ],
+    "taper": [
+      0,
+      10
+    ],
+    "tower_h": [
+      10,
+      50
+    ],
+    "bore_r": [
+      3,
+      12
+    ],
+    "rib_t": [
+      3,
+      5
+    ],
+    "corner_r": [
+      30,
+      80
+    ]
+  },
+  "asserts": [
+    "tower_top < tower_low",
+    "bore_r*2 < tower_top",
+    "bore_x + bore_r < corner_r",
+    "rib_t < tower_top",
+    "plate_l < 2*corner_r",
+    "2*corner_r < sqrt((plate_l - 2*plate_t*tan(radians(taper)))*(plate_l - 2*plate_t*tan(radians(taper))) + (plate_w - 2*plate_t*tan(radians(taper)))*(plate_w - 2*plate_t*tan(radians(taper))))",
+    "lug_t < plate_t"
+  ],
+  "result": "raised",
+  "features": [
+    {
+      "id": "base",
+      "type": "box",
+      "size": [
+        "plate_l",
+        "plate_w",
+        "plate_t"
+      ]
+    },
+    {
+      "id": "tapered",
+      "type": "draft",
+      "body": "base",
+      "faces": [
+        "base/+x",
+        "base/-x",
+        "base/+y",
+        "base/-y"
+      ],
+      "angle": "taper",
+      "neutral": "base/-z"
+    },
+    {
+      "id": "deck",
+      "type": "plane",
+      "from": {
+        "body": "tapered",
+        "face": "base/+z"
+      },
+      "offset": "tower_h"
+    },
+    {
+      "id": "low",
+      "type": "sketch",
+      "on": {
+        "body": "tapered",
+        "face": "base/+z"
+      },
+      "points": {
+        "o": [
+          0,
+          0
+        ]
+      },
+      "circles": {
+        "rim": {
+          "centre": "o",
+          "radius": "tower_low"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "o",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "radius",
+          "circle": "rim",
+          "value": "tower_low"
+        }
+      ]
+    },
+    {
+      "id": "high",
+      "type": "sketch",
+      "on": {
+        "plane": "deck"
+      },
+      "points": {
+        "o": [
+          0,
+          0
+        ]
+      },
+      "circles": {
+        "rim": {
+          "centre": "o",
+          "radius": "tower_top"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "o",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "radius",
+          "circle": "rim",
+          "value": "tower_top"
+        }
+      ]
+    },
+    {
+      "id": "tower",
+      "type": "loft",
+      "sketches": [
+        "low",
+        "high"
+      ]
+    },
+    {
+      "id": "hull",
+      "type": "fuse",
+      "target": "tapered",
+      "tool": "tower"
+    },
+    {
+      "id": "round",
+      "type": "cylinder",
+      "radius": "corner_r",
+      "height": 120
+    },
+    {
+      "id": "body",
+      "type": "common",
+      "target": "hull",
+      "tool": "round"
+    },
+    {
+      "id": "lug",
+      "type": "box",
+      "size": [
+        "lug_w",
+        "lug_d",
+        "lug_t"
+      ],
+      "at": [
+        0,
+        "plate_w/2 + lug_d/2 - 2",
+        "-plate_t/2 + lug_t/2"
+      ]
+    },
+    {
+      "id": "lugs",
+      "type": "mirror",
+      "body": "lug",
+      "plane": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "eared",
+      "type": "fuse",
+      "target": "body",
+      "tool": "lugs"
+    },
+    {
+      "id": "pin",
+      "type": "cylinder",
+      "radius": "bore_r",
+      "height": 60
+    },
+    {
+      "id": "bore",
+      "type": "translate",
+      "body": "pin",
+      "offset": [
+        "bore_x",
+        0,
+        0
+      ]
+    },
+    {
+      "id": "drilled",
+      "type": "cut",
+      "target": "eared",
+      "tool": "bore"
+    },
+    {
+      "id": "web",
+      "type": "sketch",
+      "open": true,
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          1,
+          0
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          16,
+          30
+        ],
+        "b": [
+          40,
+          "plate_t/2"
+        ]
+      },
+      "lines": {
+        "slope": [
+          "a",
+          "b"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            16,
+            30
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "b",
+          "at": [
+            40,
+            "plate_t/2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stiff",
+      "type": "rib",
+      "body": "drilled",
+      "sketch": "web",
+      "thickness": "rib_t",
+      "depth": "rib_d"
+    },
+    {
+      "id": "raised",
+      "type": "move_face",
+      "body": "stiff",
+      "face": "tower/end",
+      "distance": "boss_h"
+    },
+    {
+      "id": "spin",
+      "type": "axis",
+      "body": "raised",
+      "face": "tower/rim"
+    }
+  ]
+}

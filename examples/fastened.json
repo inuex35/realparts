@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "name": "plate, washer, screw",
+    "note": "a standard M6 socket head screw on a washer in an M6 clearance hole. The hole and the screw come from the same table, so `interference` says clearance and the bill lists them by their standard names. (A washer does not fit a counterbore: ISO 7089 is 12 across, ISO 4762 counterbores are 11.)"
+  },
+  "parameters": {"thickness": 12, "screw_length": 20},
+  "features": [
+    {"id": "plate", "type": "box", "size": [40, 40, "thickness"], "at": [0, 0, 0], "centred": false},
+    {"id": "hole", "type": "hole", "body": "plate", "face": "plate/+z", "at": [0, 0],
+     "standard": "M6", "fit": "normal"},
+    {"id": "screw", "type": "fastener", "standard": "M6", "kind": "socket_head",
+     "length": "screw_length"},
+    {"id": "washer", "type": "fastener", "standard": "M6", "kind": "washer"},
+    {"id": "asm", "type": "assemble", "bodies": ["hole", "washer", "screw"], "ground": "hole",
+     "mates": [
+       {"kind": "fastened", "faces": ["washer/-z", "plate/+z"],
+        "note": "a fastened mate meets the two faces centre to centre, and the hole is in the middle of the plate, so this alone puts the washer over the hole"},
+       {"kind": "fastened", "faces": ["screw/under", "washer/+z"]}
+     ]}
+  ],
+  "result": "asm"
+}

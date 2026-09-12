@@ -1,0 +1,32 @@
+# The extension manifest, for Blender 4.2+'s extension system (Preferences >
+# Get Extensions > Install from Disk, and the stores that expect it). The same
+# zip still installs as a legacy add-on through `bl_info`; nothing in the code
+# depends on which door it came through, because every import is relative and
+# the preferences are looked up by `__package__`.
+schema_version = "1.0.0"
+
+id = "cadcore_bridge"
+version = "0.2.4"
+name = "RealParts"
+tagline = "Parametric CAD an assistant can drive and the kernel can check"
+maintainer = "inuex35"
+type = "add-on"
+website = "https://github.com/inuex35/realparts"
+tags = ["Modeling", "Import-Export"]
+
+# 5.1 is where Blender's own Python became 3.13, the interpreter the kernel's
+# wheels exist for; on 4.x the Install button would have nothing to install into
+blender_version_min = "5.1.0"
+
+license = ["SPDX:BSD-3-Clause"]
+copyright = ["2025-2026 inuex35"]
+
+# Said up front, because a store shows it before the first click: the kernel
+# (OpenCASCADE, PlaneGCS and, if chosen, NGSolve) is fetched from PyPI on
+# first use, and the add-on reads and writes the documents you point it at
+[permissions]
+network = "Downloads the CAD kernel from PyPI on first use"
+files = "Reads and writes the CAD documents and exports you choose"
+
+[build]
+paths_exclude_pattern = ["__pycache__/", "*.pyc", ".*", "kernel/.kernel/"]

@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "name": "bracket and bush",
+    "note": "two documents mated by face name; the assembly drives the bush's diameter from the bore it goes into"
+  },
+  "parameters": {
+    "bore": 14,
+    "clearance": 0.1,
+    "seat": 10
+  },
+  "features": [
+    {
+      "id": "base",
+      "type": "part",
+      "document": "bracket.json"
+    },
+    {
+      "id": "bush",
+      "type": "part",
+      "document": "parts/bush.json",
+      "parameters": {
+        "outer_d": "2*(bore - clearance)",
+        "inner_d": 20
+      },
+      "material": "SUS304"
+    },
+    {
+      "id": "fitted",
+      "type": "mate",
+      "kind": "concentric",
+      "move": "bush",
+      "to": "base",
+      "faces": [
+        "bush:barrel/side",
+        "base:bore_tool/side"
+      ],
+      "offset": "seat",
+      "flip": false,
+      "note": "seat is measured along the bore axis from where OCCT keeps its origin"
+    },
+    {
+      "id": "asm",
+      "type": "assemble",
+      "bodies": [
+        "base",
+        "fitted"
+      ]
+    }
+  ],
+  "result": "asm"
+}

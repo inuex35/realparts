@@ -1,0 +1,17 @@
+{
+  "meta": {"name": "link", "note": "a bar with a pin hole at each end, for a linkage"},
+  "parameters": {"length": 80, "width": 16, "thickness": 6, "hole_d": 6},
+  "parameters_bounds": {"length": [20, 400], "width": [8, 40], "thickness": [2, 20], "hole_d": [2, 20]},
+  "asserts": ["hole_d < width - 2"],
+  "features": [
+    {"id": "bar", "type": "box", "size": ["length + width", "width", "thickness"],
+     "at": ["-width/2", "-width/2", 0], "centred": false},
+    {"id": "b1", "type": "cylinder", "radius": "hole_d/2", "height": "thickness*3",
+     "at": [0, 0, "-thickness"], "axis": [0, 0, 1], "centred": false},
+    {"id": "b2", "type": "cylinder", "radius": "hole_d/2", "height": "thickness*3",
+     "at": ["length", 0, "-thickness"], "axis": [0, 0, 1], "centred": false},
+    {"id": "one", "type": "cut", "target": "bar", "tool": "b1"},
+    {"id": "link", "type": "cut", "target": "one", "tool": "b2"}
+  ],
+  "result": "link"
+}

@@ -1,0 +1,30 @@
+{
+ "id": "shaft_keyway",
+ "prompt": "Make a round shaft 20 mm in diameter and 80 mm long. Cut a keyway 6 mm wide and 3.5 mm deep along the shaft, 30 mm long, starting at one end and open at that end. Chamfer both end edges of the shaft by 1 mm.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    20,
+    20,
+    80
+   ],
+   "tol": 0.6
+  },
+  {
+   "type": "volume",
+   "between": [
+    23522.631579569614,
+    24625.254934861936
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 10.0,
+   "at_least": 1
+  }
+ ]
+}

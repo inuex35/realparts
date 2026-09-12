@@ -1,0 +1,50 @@
+{
+  "meta": {"name": "geneva wheel", "material": "A6061",
+           "note": "the driven half. Every dimension follows from the slot count: the pin has to enter and leave along its slot, which makes the crank arm square to the wheel radius at both ends, and the centre distance and this radius drop out of that right-angled triangle"},
+  "parameters": {
+    "slots": 4,
+    "crank": 45.0,
+    "slot_w": 8.4,
+    "thick": 8.0,
+    "bore_d": 14.0,
+    "overrun": 3.0,
+    "ease": 0.6
+  },
+  "parameters_bounds": {
+    "slots": [3, 8],
+    "crank": [20.0, 120.0],
+    "slot_w": [4.0, 24.0],
+    "thick": [4.0, 20.0]
+  },
+  "asserts": [
+    "slots >= 3",
+    "slot_w < crank/2",
+    "bore_d < crank/sin(pi/slots) - crank - slot_w",
+    "ease < thick/3"
+  ],
+  "features": [
+    {"id": "disc", "type": "cylinder",
+     "radius": "crank/sin(pi/slots) * cos(pi/slots)", "height": "thick",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": false,
+     "note": "radius = centres * cos(pi/n), which is what the right angle at entry gives"},
+    {"id": "slot_sk", "type": "sketch",
+     "plane": {"origin": [0, 0, "thick"], "normal": [0, 0, 1], "x_axis": [1, 0, 0]},
+     "points": {"inner": [20, 0], "outer": [50, 0]},
+     "slots": {"way": {"from": "inner", "to": "outer", "width": "slot_w"}},
+     "constraints": [
+       {"type": "fix", "point": "inner", "at": ["crank/sin(pi/slots) - crank", 0]},
+       {"type": "fix", "point": "outer",
+        "at": ["crank/sin(pi/slots) * cos(pi/slots) + overrun", 0]}
+     ],
+     "note": "from where the pin sits at mid-engagement, out through the rim"},
+    {"id": "slotted", "type": "pocket", "body": "disc", "sketch": "slot_sk",
+     "until": "through_all",
+     "pattern": {"count": "slots", "angle": "360/slots",
+                 "axis": {"origin": [0, 0, 0], "direction": [0, 0, 1]}}},
+    {"id": "bore", "type": "hole", "body": "slotted", "face": "disc/+z",
+     "diameter": "bore_d", "at": [0, 0]},
+    {"id": "eased", "type": "chamfer", "body": "bore", "distance": "ease",
+     "edges": {"of_face": "disc/+z"}}
+  ],
+  "result": "eased"
+}

@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "name": "fairing",
+    "note": "a surface model: an aerofoil skin lofted between two sections, thickened into a shell"
+  },
+  "parameters": {
+    "root_chord": 80,
+    "root_thick": 10,
+    "tip_chord": 46,
+    "tip_thick": 6,
+    "span": 120,
+    "sweep": 26,
+    "wall": 1.6
+  },
+  "parameters_bounds": {
+    "root_chord": [
+      50,
+      120
+    ],
+    "tip_chord": [
+      20,
+      70
+    ],
+    "span": [
+      60,
+      200
+    ],
+    "wall": [
+      0.8,
+      3.0
+    ]
+  },
+  "asserts": [
+    "tip_chord < root_chord",
+    "tip_thick < root_thick",
+    "wall < tip_thick/3"
+  ],
+  "features": [
+    {
+      "id": "root",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "nose": [
+          -40.0,
+          0
+        ],
+        "tail": [
+          40.0,
+          0
+        ],
+        "upper": [
+          0,
+          -75.0
+        ],
+        "lower": [
+          0,
+          75.0
+        ]
+      },
+      "arcs": {
+        "top": {
+          "centre": "upper",
+          "from": "nose",
+          "to": "tail",
+          "ccw": false
+        },
+        "bottom": {
+          "centre": "lower",
+          "from": "tail",
+          "to": "nose",
+          "ccw": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "nose",
+          "at": [
+            -40.0,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "tail",
+          "at": [
+            40.0,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "upper",
+          "at": [
+            0,
+            -75.0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "lower",
+          "at": [
+            0,
+            75.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tip",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          120
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "nose": [
+          3.0,
+          0
+        ],
+        "tail": [
+          49.0,
+          0
+        ],
+        "upper": [
+          26,
+          -41.083333333333336
+        ],
+        "lower": [
+          26,
+          41.083333333333336
+        ]
+      },
+      "arcs": {
+        "top": {
+          "centre": "upper",
+          "from": "nose",
+          "to": "tail",
+          "ccw": false
+        },
+        "bottom": {
+          "centre": "lower",
+          "from": "tail",
+          "to": "nose",
+          "ccw": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "nose",
+          "at": [
+            3.0,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "tail",
+          "at": [
+            49.0,
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "upper",
+          "at": [
+            26,
+            -41.083333333333336
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "lower",
+          "at": [
+            26,
+            41.083333333333336
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skin",
+      "type": "surface",
+      "method": "skin",
+      "sketches": [
+        "root",
+        "tip"
+      ]
+    },
+    {
+      "id": "shell",
+      "type": "thicken",
+      "body": "skin",
+      "thickness": "wall"
+    }
+  ],
+  "result": "shell"
+}

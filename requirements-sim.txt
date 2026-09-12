@@ -1,0 +1,17 @@
+# The studies, on top of the kernel: `simulate`, `optimize`, and the `studies`
+# a document declares. About 305 MB on top of requirements.txt, which is more
+# than the kernel itself costs.
+#
+# Kept apart because nothing pays for it until it is asked for: every import of
+# `simulation` inside `cadcore` is inside a function, so a checkout that models,
+# draws and exports never loads NGSolve at all. Splitting the file is what lets
+# that already-true fact reach whoever is installing.
+
+-r requirements.txt
+
+# mesher + FEM (Netgen/NGSolve) -- LGPL, safe to import in-process
+ngsolve==6.2.2606
+# NGSolve's eigenvalue solvers import scipy at call time, so the modal and
+# buckling studies need it even though nothing here imports it directly.
+# It was missing, and CI failed on it eight times in a row.
+scipy>=1.11

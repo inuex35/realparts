@@ -1,0 +1,395 @@
+{
+  "meta": {
+    "name": "camera bracket",
+    "note": "the worked example from the design brief: four M6 holes, filleted corners",
+    "material": "A6061"
+  },
+  "parameters": {
+    "width": 80,
+    "depth": 60,
+    "thickness": 8,
+    "wall": 10,
+    "wall_height": 55,
+    "bore": 14,
+    "hole_r": 3.3,
+    "hole_dx": 30,
+    "hole_dy": 8,
+    "corner_r": 6,
+    "root_r": 5
+  },
+  "features": [
+    {
+      "id": "plate",
+      "type": "box",
+      "size": [
+        "width",
+        "depth",
+        "thickness"
+      ],
+      "at": [
+        0,
+        0,
+        "thickness/2"
+      ]
+    },
+    {
+      "id": "wall",
+      "type": "box",
+      "size": [
+        "width",
+        "wall",
+        "wall_height"
+      ],
+      "at": [
+        0,
+        "-(depth - wall)/2",
+        "wall_height/2"
+      ]
+    },
+    {
+      "id": "body",
+      "type": "fuse",
+      "target": "plate",
+      "tool": "wall"
+    },
+    {
+      "id": "bore_tool",
+      "type": "cylinder",
+      "radius": "bore",
+      "height": "wall*4",
+      "at": [
+        0,
+        "-(depth - wall)/2",
+        "wall_height*0.62"
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "bored",
+      "type": "cut",
+      "target": "body",
+      "tool": "bore_tool"
+    },
+    {
+      "id": "h1",
+      "type": "cylinder",
+      "radius": "hole_r",
+      "height": "thickness*4",
+      "at": [
+        "-hole_dx",
+        "hole_dy",
+        "thickness/2"
+      ]
+    },
+    {
+      "id": "c1",
+      "type": "cut",
+      "target": "bored",
+      "tool": "h1"
+    },
+    {
+      "id": "h2",
+      "type": "cylinder",
+      "radius": "hole_r",
+      "height": "thickness*4",
+      "at": [
+        "hole_dx",
+        "hole_dy",
+        "thickness/2"
+      ]
+    },
+    {
+      "id": "c2",
+      "type": "cut",
+      "target": "c1",
+      "tool": "h2"
+    },
+    {
+      "id": "h3",
+      "type": "cylinder",
+      "radius": "hole_r",
+      "height": "thickness*4",
+      "at": [
+        "-hole_dx",
+        "hole_dy + 16",
+        "thickness/2"
+      ]
+    },
+    {
+      "id": "c3",
+      "type": "cut",
+      "target": "c2",
+      "tool": "h3"
+    },
+    {
+      "id": "h4",
+      "type": "cylinder",
+      "radius": "hole_r",
+      "height": "thickness*4",
+      "at": [
+        "hole_dx",
+        "hole_dy + 16",
+        "thickness/2"
+      ]
+    },
+    {
+      "id": "c4",
+      "type": "cut",
+      "target": "c3",
+      "tool": "h4"
+    },
+    {
+      "id": "root_fillet",
+      "type": "fillet",
+      "body": "c4",
+      "radius": "root_r",
+      "edges": {
+        "between": [
+          "plate/+z",
+          "wall/+y"
+        ]
+      }
+    },
+    {
+      "id": "round_corners",
+      "type": "fillet",
+      "body": "root_fillet",
+      "radius": "corner_r",
+      "edges": {
+        "parallel": "z",
+        "between": [
+          "plate/+x",
+          "plate/+y"
+        ]
+      }
+    }
+  ],
+  "result": "round_corners",
+  "parameters_bounds": {
+    "width": [
+      60,
+      110
+    ],
+    "depth": [
+      45,
+      80
+    ],
+    "thickness": [
+      5,
+      12
+    ],
+    "wall": [
+      8,
+      16
+    ],
+    "wall_height": [
+      35,
+      70
+    ],
+    "bore": [
+      8,
+      20
+    ],
+    "hole_r": [
+      2.5,
+      4.5
+    ],
+    "hole_dx": [
+      20,
+      40
+    ],
+    "hole_dy": [
+      4,
+      14
+    ],
+    "corner_r": [
+      3,
+      9
+    ],
+    "root_r": [
+      3,
+      8
+    ]
+  },
+  "asserts": [
+    "hole_dx + hole_r < width/2 - 2",
+    "hole_dy + 16 + hole_r < depth/2 - 2",
+    "sqrt((width/2 - hole_dx)**2 + (depth/2 - (hole_dy + 16))**2) > corner_r + hole_r + 1",
+    "bore*2 + 6 < wall_height",
+    "bore*2 + 6 < width",
+    "corner_r < min(width, depth)/4",
+    "thickness < wall_height/3",
+    "root_r < thickness*1.2",
+    "wall_height*0.62 - bore > thickness + root_r + 2"
+  ],
+  "studies": [
+    {
+      "id": "mount_load",
+      "type": "static_structural",
+      "body": "round_corners",
+      "material": "A6061",
+      "mesh_size": 5.0,
+      "fix": [
+        "h1/side",
+        "h2/side",
+        "h3/side",
+        "h4/side"
+      ],
+      "loads": [
+        {
+          "face": "wall/+y",
+          "force": [
+            0,
+            500,
+            0
+          ]
+        }
+      ],
+      "require": {
+        "safety_factor": ">= 2",
+        "max_displacement": "<= 0.5"
+      },
+      "convergence": {
+        "levels": 3,
+        "ratio": 1.5,
+        "tolerance": 0.05
+      },
+      "note": "bolted through the four holes; clamping the whole bottom face invents a singularity at the clamp edge"
+    },
+    {
+      "id": "shake",
+      "type": "modal",
+      "material": "A6061",
+      "mesh_size": 6.0,
+      "modes": 4,
+      "fix": [
+        "h1/side",
+        "h2/side",
+        "h3/side",
+        "h4/side"
+      ],
+      "require": {
+        "fundamental_Hz": ">= 400"
+      }
+    },
+    {
+      "id": "warm",
+      "type": "thermal",
+      "material": "A6061",
+      "mesh_size": 6.0,
+      "reference": 20.0,
+      "temperatures": [
+        {
+          "face": "wall/+y",
+          "value": 85.0
+        }
+      ],
+      "convection": [
+        {
+          "face": "plate/-z@0",
+          "film": 2.5e-05,
+          "ambient": 20.0
+        }
+      ],
+      "fix": [
+        "h1/side"
+      ],
+      "require": {
+        "max_temperature": "<= 90",
+        "p95_von_mises": "<= 8"
+      },
+      "note": "bolted tight at one hole and slotted at the others: clamping all four would restrain the expansion and is a different design"
+    }
+  ],
+  "drawing": {
+    "sheet": "A3",
+    "scale": 1.0,
+    "views": [
+      "front",
+      "top",
+      "right"
+    ],
+    "datums": {
+      "A": "plate/-z@0",
+      "B": "plate/-x@0"
+    },
+    "datum_view": "front",
+    "dimensions": [
+      {
+        "view": "front",
+        "type": "linear",
+        "faces": [
+          "plate/-x@0",
+          "plate/+x@0"
+        ],
+        "offset": -14
+      },
+      {
+        "view": "front",
+        "type": "linear",
+        "faces": [
+          "plate/-z@0",
+          "wall/+z"
+        ],
+        "offset": 16
+      },
+      {
+        "view": "front",
+        "type": "diameter",
+        "faces": [
+          "bore_tool/side"
+        ],
+        "offset": 20
+      },
+      {
+        "view": "top",
+        "type": "linear",
+        "faces": [
+          "plate/-y",
+          "plate/+y"
+        ],
+        "offset": 16
+      },
+      {
+        "view": "top",
+        "type": "diameter",
+        "faces": [
+          "h1/side"
+        ],
+        "offset": 12
+      }
+    ],
+    "tolerances": [
+      {
+        "view": "front",
+        "face": "bore_tool/side",
+        "kind": "position",
+        "value": 0.1,
+        "diametral": true,
+        "datums": [
+          "A",
+          "B"
+        ],
+        "dx": 30,
+        "dy": 30
+      },
+      {
+        "view": "front",
+        "face": "plate/-z@0",
+        "kind": "flatness",
+        "value": 0.05,
+        "dx": -34,
+        "dy": 10
+      }
+    ],
+    "title": {
+      "part": "camera bracket",
+      "material": "A6061-T6",
+      "finish": "clear anodise"
+    }
+  }
+}

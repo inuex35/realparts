@@ -1,0 +1,367 @@
+{
+  "meta": {
+    "name": "quadruped body",
+    "material": "A6061",
+    "note": "the chassis: a plate with a hip pin at each corner, and on the front of it a neck, a head with a muzzle and ears, and at the back a tail. The pins are what the legs mate to, so their diameter is the one number the legs have to agree with; everything forward of the neck is silhouette, and silhouette is what makes it read as a dog rather than as a table"
+  },
+  "parameters": {
+    "length": 150.0,
+    "width": 80.0,
+    "thick": 10.0,
+    "pin_d": 8.0,
+    "pin_out": 14.0,
+    "hip_dx": 55.0,
+    "ease": 1.2,
+    "neck_high": 55.0,
+    "head_len": 78.0,
+    "head_wide": 62.0,
+    "head_high": 46.0,
+    "muzzle": 34.0,
+    "ear_high": 16.0,
+    "ear_back": 6.0,
+    "tail_len": 60.0,
+    "tail_d": 13.0,
+    "tail_rise": 1.0
+  },
+  "parameters_bounds": {
+    "length": [
+      80.0,
+      300.0
+    ],
+    "width": [
+      40.0,
+      200.0
+    ],
+    "thick": [
+      4.0,
+      25.0
+    ],
+    "pin_d": [
+      4.0,
+      16.0
+    ],
+    "pin_out": [
+      6.0,
+      40.0
+    ],
+    "hip_dx": [
+      20.0,
+      140.0
+    ],
+    "neck_high": [
+      0.0,
+      200.0
+    ],
+    "head_len": [
+      20.0,
+      200.0
+    ],
+    "head_wide": [
+      20.0,
+      200.0
+    ],
+    "head_high": [
+      15.0,
+      150.0
+    ],
+    "ear_high": [
+      0.0,
+      60.0
+    ],
+    "tail_len": [
+      0.0,
+      150.0
+    ],
+    "tail_d": [
+      4.0,
+      40.0
+    ]
+  },
+  "asserts": [
+    "hip_dx < length/2 - pin_d",
+    "pin_d < thick + 4",
+    "ease < thick/3"
+  ],
+  "features": [
+    {
+      "id": "plate",
+      "type": "box",
+      "size": [
+        "length",
+        "width",
+        "thick"
+      ],
+      "at": [
+        0,
+        0,
+        0
+      ],
+      "centred": true
+    },
+    {
+      "id": "pin_fl",
+      "type": "cylinder",
+      "radius": "pin_d/2",
+      "height": "pin_out",
+      "at": [
+        "-hip_dx",
+        "width/2",
+        0
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "centred": false
+    },
+    {
+      "id": "a",
+      "type": "fuse",
+      "target": "plate",
+      "tool": "pin_fl"
+    },
+    {
+      "id": "pin_fr",
+      "type": "cylinder",
+      "radius": "pin_d/2",
+      "height": "pin_out",
+      "at": [
+        "-hip_dx",
+        "-width/2 - pin_out",
+        0
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "centred": false
+    },
+    {
+      "id": "b",
+      "type": "fuse",
+      "target": "a",
+      "tool": "pin_fr"
+    },
+    {
+      "id": "pin_bl",
+      "type": "cylinder",
+      "radius": "pin_d/2",
+      "height": "pin_out",
+      "at": [
+        "hip_dx",
+        "width/2",
+        0
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "centred": false
+    },
+    {
+      "id": "c",
+      "type": "fuse",
+      "target": "b",
+      "tool": "pin_bl"
+    },
+    {
+      "id": "pin_br",
+      "type": "cylinder",
+      "radius": "pin_d/2",
+      "height": "pin_out",
+      "at": [
+        "hip_dx",
+        "-width/2 - pin_out",
+        0
+      ],
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "centred": false
+    },
+    {
+      "id": "shell4",
+      "type": "fuse",
+      "target": "c",
+      "tool": "pin_br"
+    },
+    {
+      "id": "neck",
+      "type": "box",
+      "size": [
+        "head_wide*0.5",
+        "head_wide*0.5",
+        "neck_high"
+      ],
+      "at": [
+        "-length/2 + head_wide*0.30",
+        0,
+        "thick/2 + neck_high/2"
+      ],
+      "centred": true,
+      "note": "the riser the head sits on. Centred, because a box that is not runs from the centreline to one side: the head was joined to the plate down one edge and hanging over the other"
+    },
+    {
+      "id": "necked",
+      "type": "fuse",
+      "target": "shell4",
+      "tool": "neck"
+    },
+    {
+      "id": "skull",
+      "type": "box",
+      "size": [
+        "head_len*0.52",
+        "head_wide",
+        "head_high"
+      ],
+      "at": [
+        "-length/2 - muzzle + head_len - head_len*0.52/2",
+        0,
+        "thick/2 + neck_high + head_high/2"
+      ],
+      "centred": true,
+      "note": "the cranium: the back half of the head, full width and full height. What the ears sit on and what the height is measured to"
+    },
+    {
+      "id": "headed",
+      "type": "fuse",
+      "target": "necked",
+      "tool": "skull"
+    },
+    {
+      "id": "snout",
+      "type": "box",
+      "size": [
+        "head_len*0.48",
+        "head_wide*0.60",
+        "head_high*0.50"
+      ],
+      "at": [
+        "-length/2 - muzzle + head_len*0.48/2",
+        0,
+        "thick/2 + neck_high + head_high*0.26 + head_high*0.50/2"
+      ],
+      "centred": true,
+      "note": "the muzzle: narrower and shorter than the cranium, and set low on it -- but not flush with the bottom, which made the face one shelf instead of two"
+    },
+    {
+      "id": "muzzled",
+      "type": "fuse",
+      "target": "headed",
+      "tool": "snout"
+    },
+    {
+      "id": "nosed",
+      "type": "chamfer",
+      "body": "muzzled",
+      "edges": {
+        "of_face": "snout/-x"
+      },
+      "distance": "head_high*0.16",
+      "note": "the nose: a box ends in a square, and nothing with a square end looks like an animal"
+    },
+    {
+      "id": "crowned",
+      "type": "chamfer",
+      "body": "nosed",
+      "edges": {
+        "of_face": "skull/+z"
+      },
+      "distance": "head_high*0.13",
+      "note": "the top of the head, taken before the ears go on: afterwards that edge is two edges with the ears standing in the gap"
+    },
+    {
+      "id": "ear_l",
+      "type": "box",
+      "size": [
+        "head_len*0.17",
+        "head_wide*0.13",
+        "ear_high"
+      ],
+      "at": [
+        "-length/2 - muzzle + head_len - head_len*0.17/2 - ear_back",
+        "head_wide*0.30",
+        "thick/2 + neck_high + head_high + ear_high/2"
+      ],
+      "centred": true
+    },
+    {
+      "id": "eared_l",
+      "type": "fuse",
+      "target": "crowned",
+      "tool": "ear_l"
+    },
+    {
+      "id": "ear_r",
+      "type": "box",
+      "size": [
+        "head_len*0.17",
+        "head_wide*0.13",
+        "ear_high"
+      ],
+      "at": [
+        "-length/2 - muzzle + head_len - head_len*0.17/2 - ear_back",
+        "-head_wide*0.30",
+        "thick/2 + neck_high + head_high + ear_high/2"
+      ],
+      "centred": true
+    },
+    {
+      "id": "eared_r",
+      "type": "fuse",
+      "target": "eared_l",
+      "tool": "ear_r"
+    },
+    {
+      "id": "tail",
+      "type": "cylinder",
+      "radius": "tail_d/2",
+      "height": "tail_len",
+      "at": [
+        "length/2 - tail_d/2",
+        0,
+        "thick/2"
+      ],
+      "axis": [
+        0.45,
+        0,
+        "tail_rise"
+      ],
+      "centred": false,
+      "note": "up and back, and short. A tail is the cheapest thing on the model and does more for the silhouette than the head does"
+    },
+    {
+      "id": "tailed",
+      "type": "fuse",
+      "target": "eared_r",
+      "tool": "tail"
+    },
+    {
+      "id": "tipped",
+      "type": "chamfer",
+      "body": "tailed",
+      "edges": {
+        "of_face": "ear_l/+z"
+      },
+      "distance": "ear_high*0.14",
+      "note": "the ear tips. Small: the ear is 8 mm across, and a chamfer that eats more than half of that is not a chamfer"
+    },
+    {
+      "id": "tipped2",
+      "type": "chamfer",
+      "body": "tipped",
+      "edges": {
+        "of_face": "ear_r/+z"
+      },
+      "distance": "ear_high*0.14",
+      "note": "the ear tips. Small: the ear is 8 mm across, and a chamfer that eats more than half of that is not a chamfer"
+    }
+  ],
+  "result": "tipped2"
+}

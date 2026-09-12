@@ -1,0 +1,36 @@
+{
+ "id": "l_bracket",
+ "prompt": "Make an L-shaped bracket from 6 mm plate: a base 80 mm wide and 60 mm deep, and an upright 80 mm wide and 50 mm tall standing on one long edge of the base (overall height 50 mm). Put four 6.6 mm diameter through holes in the base, 12 mm in from its edges. Fillet the inside corner where the upright meets the base with a 4 mm radius.",
+ "checks": [
+  {
+   "type": "solid"
+  },
+  {
+   "type": "bbox",
+   "extents": [
+    80,
+    60,
+    50
+   ]
+  },
+  {
+   "type": "cylinders",
+   "radius": 3.3,
+   "count": 4
+  },
+  {
+   "type": "fem",
+   "force": [
+    0,
+    0,
+    -500
+   ],
+   "sf_min": 2.0,
+   "material": "A6061"
+  },
+  {
+   "type": "printable",
+   "min_wall": 1.5
+  }
+ ]
+}

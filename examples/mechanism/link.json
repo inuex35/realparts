@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "name": "link",
+    "material": "A6061",
+    "note": "one bar of a linkage: a stadium with a hole at each end. Every bar in every mechanism here is this document with a different centre distance, which is what a parametric part is for"
+  },
+  "parameters": {
+    "centres": 80.0,
+    "width": 16.0,
+    "thick": 6.0,
+    "hole_d": 6.0,
+    "ease": 0.8
+  },
+  "parameters_bounds": {
+    "centres": [
+      20.0,
+      300.0
+    ],
+    "width": [
+      8.0,
+      40.0
+    ],
+    "thick": [
+      3.0,
+      20.0
+    ],
+    "hole_d": [
+      3.0,
+      20.0
+    ]
+  },
+  "asserts": [
+    "hole_d < width - 4.0",
+    "centres > width",
+    "ease < thick / 3"
+  ],
+  "features": [
+    {
+      "id": "outline",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "p": [
+          -40,
+          0
+        ],
+        "q": [
+          40,
+          0
+        ]
+      },
+      "slots": {
+        "bar": {
+          "from": "p",
+          "to": "q",
+          "width": "width"
+        }
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "p",
+          "at": [
+            "-centres/2",
+            0
+          ]
+        },
+        {
+          "type": "fix",
+          "point": "q",
+          "at": [
+            "centres/2",
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bar",
+      "type": "extrude",
+      "sketch": "outline",
+      "distance": "thick"
+    },
+    {
+      "id": "pin_a",
+      "type": "hole",
+      "body": "bar",
+      "face": "bar/top",
+      "diameter": "hole_d",
+      "at": [
+        "-centres/2",
+        0
+      ]
+    },
+    {
+      "id": "pin_b",
+      "type": "hole",
+      "body": "pin_a",
+      "face": "bar/top",
+      "diameter": "hole_d",
+      "at": [
+        "centres/2",
+        0
+      ]
+    },
+    {
+      "id": "eased",
+      "type": "chamfer",
+      "body": "pin_b",
+      "distance": "ease",
+      "edges": {
+        "of_face": "bar/top"
+      }
+    }
+  ],
+  "result": "eased"
+}

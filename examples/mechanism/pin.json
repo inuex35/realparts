@@ -1,0 +1,14 @@
+{
+  "meta": {"name": "crank pin", "material": "SUS304",
+           "note": "the roller that rides in a yoke slot or a Geneva slot"},
+  "parameters": {"pin_d": 12.0, "length": 20.0, "ease": 0.6},
+  "parameters_bounds": {"pin_d": [4.0, 30.0], "length": [6.0, 60.0]},
+  "asserts": ["ease < pin_d/4", "ease < length/4"],
+  "features": [
+    {"id": "blank", "type": "cylinder", "radius": "pin_d/2", "height": "length",
+     "at": [0, 0, 0], "axis": [0, 0, 1], "centred": true},
+    {"id": "eased", "type": "chamfer", "body": "blank", "distance": "ease",
+     "edges": {"of_face": "blank/+z"}}
+  ],
+  "result": "eased"
+}

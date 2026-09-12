@@ -1,0 +1,39 @@
+{
+  "meta": {"name": "scotch yoke", "material": "A6061",
+           "note": "a plate with a slot square to the travel. The pin drives it in x and slides freely in y, which is what turns a circle into a sine"},
+  "parameters": {"run": 140.0, "height": 110.0, "thick": 8.0, "slot_w": 12.4,
+                 "rail": 14.0, "ease": 0.8},
+  "parameters_bounds": {"run": [60.0, 300.0], "height": [40.0, 220.0],
+                        "thick": [4.0, 20.0], "slot_w": [5.0, 40.0]},
+  "asserts": ["slot_w < height - 2*rail", "rail > slot_w/4", "ease < thick/3"],
+  "features": [
+    {"id": "outline", "type": "sketch",
+     "plane": {"origin": [0, 0, 0], "normal": [0, 0, 1], "x_axis": [1, 0, 0]},
+     "points": {"o": [0, 0], "a": [140, 0], "b": [140, 110], "c": [0, 110]},
+     "lines": {"bottom": ["o", "a"], "right": ["a", "b"], "top": ["b", "c"],
+               "left": ["c", "o"]},
+     "constraints": [
+       {"type": "fix", "point": "o", "at": ["-run/2", "-height/2"]},
+       {"type": "horizontal", "line": "bottom"},
+       {"type": "horizontal", "line": "top"},
+       {"type": "vertical", "line": "right"},
+       {"type": "vertical", "line": "left"},
+       {"type": "distance", "points": ["o", "a"], "value": "run"},
+       {"type": "distance", "points": ["o", "c"], "value": "height"}
+     ]},
+    {"id": "plate", "type": "extrude", "sketch": "outline", "distance": "thick"},
+    {"id": "way_sk", "type": "sketch",
+     "plane": {"origin": [0, 0, 8], "normal": [0, 0, 1], "x_axis": [1, 0, 0]},
+     "points": {"p": [0, -40], "q": [0, 40]},
+     "slots": {"way": {"from": "p", "to": "q", "width": "slot_w"}},
+     "constraints": [
+       {"type": "fix", "point": "p", "at": [0, "-(height/2 - rail)"]},
+       {"type": "fix", "point": "q", "at": [0, "height/2 - rail"]}
+     ]},
+    {"id": "slotted", "type": "pocket", "body": "plate", "sketch": "way_sk",
+     "until": "through_all"},
+    {"id": "eased", "type": "chamfer", "body": "slotted", "distance": "ease",
+     "edges": {"of_face": "plate/top"}}
+  ],
+  "result": "eased"
+}

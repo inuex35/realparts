@@ -1,0 +1,185 @@
+{
+  "meta": {
+    "name": "sheet metal L bracket",
+    "note": "a blank, two flanges and four holes -- the flat pattern comes from the bends, not from the solid"
+  },
+  "parameters": {
+    "width": 60,
+    "depth": 90,
+    "thickness": 2.0,
+    "wall": 30,
+    "lip": 12,
+    "radius": 2.5,
+    "hole_d": 5.5,
+    "hole_in": 12
+  },
+  "parameters_bounds": {
+    "width": [
+      30,
+      120
+    ],
+    "depth": [
+      40,
+      200
+    ],
+    "thickness": [
+      0.8,
+      4.0
+    ],
+    "wall": [
+      10,
+      60
+    ],
+    "radius": [
+      1.0,
+      6.0
+    ]
+  },
+  "asserts": [
+    "radius >= thickness * 0.8",
+    "hole_in > hole_d",
+    "lip < wall"
+  ],
+  "features": [
+    {
+      "id": "blank",
+      "type": "sketch",
+      "plane": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "normal": [
+          0,
+          0,
+          1
+        ],
+        "x_axis": [
+          1,
+          0,
+          0
+        ]
+      },
+      "points": {
+        "a": [
+          0,
+          0
+        ],
+        "b": [
+          90,
+          0
+        ],
+        "c": [
+          90,
+          60
+        ],
+        "d": [
+          0,
+          60
+        ]
+      },
+      "lines": {
+        "front": [
+          "a",
+          "b"
+        ],
+        "right": [
+          "b",
+          "c"
+        ],
+        "back": [
+          "c",
+          "d"
+        ],
+        "left": [
+          "d",
+          "a"
+        ]
+      },
+      "constraints": [
+        {
+          "type": "fix",
+          "point": "a",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "type": "horizontal",
+          "line": "front"
+        },
+        {
+          "type": "vertical",
+          "line": "right"
+        },
+        {
+          "type": "horizontal",
+          "line": "back"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "a",
+            "b"
+          ],
+          "value": "depth"
+        },
+        {
+          "type": "distance",
+          "points": [
+            "b",
+            "c"
+          ],
+          "value": "width"
+        }
+      ]
+    },
+    {
+      "id": "plate",
+      "type": "sheet",
+      "sketch": "blank",
+      "thickness": "thickness"
+    },
+    {
+      "id": "wall",
+      "type": "flange",
+      "body": "plate",
+      "edge": "plate/right|plate/top",
+      "length": "wall",
+      "angle": 90,
+      "radius": "radius"
+    },
+    {
+      "id": "lip",
+      "type": "flange",
+      "body": "wall",
+      "edge": "wall/end|wall/face",
+      "length": "lip",
+      "angle": -90,
+      "radius": "radius"
+    },
+    {
+      "id": "bolts",
+      "type": "hole",
+      "body": "lip",
+      "face": "plate/top",
+      "diameter": "hole_d",
+      "at": [
+        "hole_in - depth/2",
+        "hole_in - width/2"
+      ],
+      "pattern": {
+        "count": 2,
+        "spacing": "depth - 2*hole_in",
+        "direction": [
+          1,
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "result": "bolts"
+}
